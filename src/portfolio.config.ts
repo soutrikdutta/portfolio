@@ -40,8 +40,9 @@ export interface CertificationItem {
   date: string;
   credentialId?: string;
   link?: string;
-  skills: string[];
+  skills?: string[];
   imageUrl?: string;
+  certificateUrl?: string;
 }
 
 
@@ -154,8 +155,7 @@ export const portfolioConfig = {
       date: "2026",
       credentialId: "6a694a24-d6c0-4423-9271-fcff2dc46187",
       link: "https://www.credly.com/badges/6a694a24-d6c0-4423-9271-fcff2dc46187/public_url",
-      imageUrl: "/certifications/google-cloud-badge.png",
-      skills: ["Google Cloud", "Network Security", "Cloud Armor", "VPC Firewalls", "Cloud IAM"]
+      imageUrl: "/certifications/google-cloud-badge.png"
     },
     {
       title: "Implement Load Balancing on Compute Engine",
@@ -163,8 +163,7 @@ export const portfolioConfig = {
       date: "2026",
       credentialId: "4d85a1f3-b393-47ac-84bf-21eec6469a29",
       link: "https://www.credly.com/badges/4d85a1f3-b393-47ac-84bf-21eec6469a29/public_url",
-      imageUrl: "/certifications/google-cloud-load-balancing.png",
-      skills: ["Compute Engine", "Load Balancing", "Cloud Shell", "Virtual Machines", "GKE"]
+      imageUrl: "/certifications/google-cloud-load-balancing.png"
     },
     {
       title: "Prepare Data for ML APIs on Google Cloud",
@@ -172,8 +171,7 @@ export const portfolioConfig = {
       date: "2026",
       credentialId: "8f8f81da-729e-4fb9-bb62-01cdbce57c06",
       link: "https://www.credly.com/badges/8f8f81da-729e-4fb9-bb62-01cdbce57c06/public_url",
-      imageUrl: "/certifications/google-cloud-ml-apis.png",
-      skills: ["Dataflow", "Dataproc", "Apache Spark", "Machine Learning APIs", "Cloud Speech-to-Text"]
+      imageUrl: "/certifications/google-cloud-ml-apis.png"
     },
     {
       title: "Set Up an App Dev Environment on Google Cloud",
@@ -181,32 +179,16 @@ export const portfolioConfig = {
       date: "2026",
       credentialId: "af945efe-dddb-47f8-9dea-de62b43b9748",
       link: "https://www.credly.com/badges/af945efe-dddb-47f8-9dea-de62b43b9748/public_url",
-      imageUrl: "/certifications/google-cloud-app-dev.png",
-      skills: ["Cloud Storage", "Cloud Functions", "Cloud Pub/Sub", "Cloud IAM", "App Development"]
+      imageUrl: "/certifications/google-cloud-app-dev.png"
     },
     {
-      title: "Front-End Web Development",
-      issuer: "Meta / Coursera",
-      date: "2025",
-      credentialId: "META-FE-98421",
-      link: "https://coursera.org",
-      skills: ["React", "JavaScript", "HTML5/CSS3", "Responsive Design"]
-    },
-    {
-      title: "Programming with Python & Data Structures",
-      issuer: "University of Michigan / Coursera",
-      date: "2025",
-      credentialId: "UMICH-PY-43210",
-      link: "https://coursera.org",
-      skills: ["Python", "Data Structures", "APIs", "Algorithms"]
-    },
-    {
-      title: "Foundations of Generative AI for Developers",
-      issuer: "DeepLearning.AI",
+      title: "Gemini Certified Student (University)",
+      issuer: "Google for Education",
       date: "2026",
-      credentialId: "DLAI-GENAI-1054",
-      link: "https://deeplearning.ai",
-      skills: ["Generative AI", "Prompt Engineering", "LLM APIs"]
+      credentialId: "191821849",
+      link: "https://edu.google.accredible.com/bc85c8d6-8c35-4f7d-bc51-5db15dca90d6",
+      imageUrl: "/certifications/gemini-certified-student-badge.png",
+      certificateUrl: "/certifications/gemini-certified-student-cert.png"
     }
   ] as CertificationItem[],
 
