@@ -176,6 +176,15 @@ export const portfolioConfig = {
       skills: ["Dataflow", "Dataproc", "Apache Spark", "Machine Learning APIs", "Cloud Speech-to-Text"]
     },
     {
+      title: "Set Up an App Dev Environment on Google Cloud",
+      issuer: "Google Cloud",
+      date: "2026",
+      credentialId: "af945efe-dddb-47f8-9dea-de62b43b9748",
+      link: "https://www.credly.com/badges/af945efe-dddb-47f8-9dea-de62b43b9748/public_url",
+      imageUrl: "/certifications/google-cloud-app-dev.png",
+      skills: ["Cloud Storage", "Cloud Functions", "Cloud Pub/Sub", "Cloud IAM", "App Development"]
+    },
+    {
       title: "Front-End Web Development",
       issuer: "Meta / Coursera",
       date: "2025",
