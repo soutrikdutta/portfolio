@@ -35,10 +35,6 @@ export const Footer: React.FC = () => {
             Email
           </a>
         </div>
-
-        <div className="text-zinc-400 text-[11px] font-mono">
-          {portfolioConfig.footer.signoff}
-        </div>
       </div>
     </footer>
   );

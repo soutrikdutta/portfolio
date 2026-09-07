@@ -202,6 +202,5 @@ export const portfolioConfig = {
   footer: {
     year: 2026,
     author: "Soutrik Dutta",
-    signoff: "Built with curiosity."
   }
 };
