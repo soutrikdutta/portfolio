@@ -74,25 +74,25 @@ export const DynamicBackground: React.FC = () => {
     window.addEventListener("touchstart", handleTouchStart, { passive: true });
     window.addEventListener("scroll", handleScroll, { passive: true });
 
-    // Calm, slow-drifting dark bluish ambient light centers
+    // Calm, subtle slow-drifting deep dark-bluish ambient light centers
     const ambientOrbs = [
       {
         xRatio: 0.25,
         yRatio: 0.2,
-        radiusRatio: 0.58,
+        radiusRatio: 0.55,
         vx: 0.15,
         vy: 0.12,
-        colorInner: "rgba(32, 74, 156, 0.45)",
-        colorOuter: "rgba(7, 18, 36, 0)",
+        colorInner: "rgba(18, 38, 78, 0.18)",
+        colorOuter: "rgba(2, 5, 11, 0)",
       },
       {
         xRatio: 0.78,
         yRatio: 0.55,
-        radiusRatio: 0.52,
+        radiusRatio: 0.5,
         vx: -0.12,
         vy: 0.14,
-        colorInner: "rgba(24, 58, 128, 0.40)",
-        colorOuter: "rgba(7, 18, 36, 0)",
+        colorInner: "rgba(14, 30, 64, 0.15)",
+        colorOuter: "rgba(2, 5, 11, 0)",
       },
       {
         xRatio: 0.45,
@@ -100,17 +100,17 @@ export const DynamicBackground: React.FC = () => {
         radiusRatio: 0.48,
         vx: 0.14,
         vy: -0.11,
-        colorInner: "rgba(20, 48, 108, 0.42)",
-        colorOuter: "rgba(7, 18, 36, 0)",
+        colorInner: "rgba(12, 26, 56, 0.16)",
+        colorOuter: "rgba(2, 5, 11, 0)",
       },
       {
         xRatio: 0.85,
         yRatio: 0.15,
-        radiusRatio: 0.44,
+        radiusRatio: 0.42,
         vx: -0.1,
         vy: -0.1,
-        colorInner: "rgba(42, 98, 198, 0.35)",
-        colorOuter: "rgba(7, 18, 36, 0)",
+        colorInner: "rgba(22, 46, 92, 0.14)",
+        colorOuter: "rgba(2, 5, 11, 0)",
       },
     ];
 
@@ -140,11 +140,11 @@ export const DynamicBackground: React.FC = () => {
 
       ctx.clearRect(0, 0, width, height);
 
-      // 1. Deep rich dark-blue base background
+      // 1. Deep stealth dark-blue base background (much darker)
       const baseGrad = ctx.createLinearGradient(0, 0, 0, height);
-      baseGrad.addColorStop(0, "#071224");    // Deep Midnight Blue
-      baseGrad.addColorStop(0.5, "#0b1b36");  // Rich Dark Navy
-      baseGrad.addColorStop(1, "#0e2347");    // Deep Ocean Blue
+      baseGrad.addColorStop(0, "#02050b");    // Deepest Midnight Abyss
+      baseGrad.addColorStop(0.5, "#040813");  // Stealth Dark Navy-Black
+      baseGrad.addColorStop(1, "#060b17");    // Deep Obsidian Night Blue
       ctx.fillStyle = baseGrad;
       ctx.fillRect(0, 0, width, height);
 
@@ -180,8 +180,8 @@ export const DynamicBackground: React.FC = () => {
         ctx.fillRect(0, 0, width, height);
       });
 
-      // 3. Interactive Mouse / Touch Reactive Dark-Bluish Spotlight
-      const spotlightRadius = Math.min(width, height) * (0.42 + pointerIntensity * 0.08);
+      // 3. Subtle Interactive Mouse / Touch Dark-Blue Spotlight
+      const spotlightRadius = Math.min(width, height) * (0.38 + pointerIntensity * 0.06);
 
       const spotlight = ctx.createRadialGradient(
         pointerX,
@@ -192,29 +192,28 @@ export const DynamicBackground: React.FC = () => {
         spotlightRadius
       );
 
-      const coreAlpha = 0.24 * pointerIntensity;
-      const midAlpha = 0.14 * pointerIntensity;
+      const coreAlpha = 0.10 * pointerIntensity;
+      const midAlpha = 0.05 * pointerIntensity;
 
-      // Soft, vibrant dark-blue and light-blue interactive luminance
-      spotlight.addColorStop(0, `rgba(56, 189, 248, ${coreAlpha})`);   // glowing cyan-blue
-      spotlight.addColorStop(0.35, `rgba(37, 99, 235, ${midAlpha})`);  // rich electric royal blue
-      spotlight.addColorStop(0.7, `rgba(20, 50, 110, ${midAlpha * 0.5})`);
-      spotlight.addColorStop(1, "rgba(7, 18, 36, 0)");
+      spotlight.addColorStop(0, `rgba(56, 189, 248, ${coreAlpha})`);
+      spotlight.addColorStop(0.35, `rgba(30, 68, 140, ${midAlpha})`);
+      spotlight.addColorStop(0.7, `rgba(12, 28, 62, ${midAlpha * 0.4})`);
+      spotlight.addColorStop(1, "rgba(2, 5, 11, 0)");
 
       ctx.fillStyle = spotlight;
       ctx.fillRect(0, 0, width, height);
 
-      // 4. Clean outer edge vignette to focus content
+      // 4. Outer edge vignette for deep focus
       const vignette = ctx.createRadialGradient(
         width * 0.5,
         height * 0.5,
-        Math.min(width, height) * 0.48,
+        Math.min(width, height) * 0.45,
         width * 0.5,
         height * 0.5,
         Math.max(width, height) * 0.85
       );
-      vignette.addColorStop(0, "rgba(7, 18, 36, 0)");
-      vignette.addColorStop(1, "rgba(4, 10, 22, 0.42)");
+      vignette.addColorStop(0, "rgba(2, 5, 11, 0)");
+      vignette.addColorStop(1, "rgba(1, 3, 6, 0.65)");
       ctx.fillStyle = vignette;
       ctx.fillRect(0, 0, width, height);
 
