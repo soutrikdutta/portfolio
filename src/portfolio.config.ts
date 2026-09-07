@@ -133,10 +133,10 @@ export const portfolioConfig = {
       ]
     },
     {
-      title: "SkillGrad — Hult Prize 2025",
+      title: "SkillGrad — Hult Prize 2026",
       category: "Competition & Innovation",
-      date: "2025",
-      description: "Second Runner-Up at the Hult Prize 2025 at Techno India University. SkillGrad is an AI-powered platform connecting students with paid, real-world micro-internships, helping them gain practical experience, build professional portfolios, and improve job readiness.",
+      date: "2026",
+      description: "Second Runner-Up at the Hult Prize 2026 at Techno India University. SkillGrad is an AI-powered platform connecting students with paid, real-world micro-internships, helping them gain practical experience, build professional portfolios, and improve job readiness.",
       highlight: "Second Runner-Up · Techno India University",
       link: "https://technotimes.info/index.php/2026/03/05/hult-prize-2025-at-techno-india-university-student-startups-driving-sustainable-innovation/",
       linkLabel: "Read Article",
