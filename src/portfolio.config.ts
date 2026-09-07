@@ -167,6 +167,15 @@ export const portfolioConfig = {
       skills: ["Compute Engine", "Load Balancing", "Cloud Shell", "Virtual Machines", "GKE"]
     },
     {
+      title: "Prepare Data for ML APIs on Google Cloud",
+      issuer: "Google Cloud",
+      date: "2026",
+      credentialId: "8f8f81da-729e-4fb9-bb62-01cdbce57c06",
+      link: "https://www.credly.com/badges/8f8f81da-729e-4fb9-bb62-01cdbce57c06/public_url",
+      imageUrl: "/certifications/google-cloud-ml-apis.png",
+      skills: ["Dataflow", "Dataproc", "Apache Spark", "Machine Learning APIs", "Cloud Speech-to-Text"]
+    },
+    {
       title: "Front-End Web Development",
       issuer: "Meta / Coursera",
       date: "2025",
