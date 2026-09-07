@@ -1,6 +1,17 @@
 import React, { useEffect, useRef } from "react";
 import { useReducedMotion } from "framer-motion";
 
+interface StardustParticle {
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
+  life: number;
+  maxLife: number;
+  size: number;
+  alpha: number;
+}
+
 export const DynamicBackground: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const shouldReduceMotion = useReducedMotion();
@@ -31,42 +42,95 @@ export const DynamicBackground: React.FC = () => {
     let pointerY = height * 0.35;
     let targetPointerX = pointerX;
     let targetPointerY = pointerY;
+    let lastPointerX = pointerX;
+    let lastPointerY = pointerY;
 
-    // Pointer intensity that brightens on movement/touch and relaxes
-    let pointerIntensity = 0.6;
-    let targetIntensity = 0.6;
+    // Pointer activity that surges on movement and relaxes
+    let pointerActivity = 0.8;
+    let targetActivity = 0.8;
 
-    // Scroll tracking
+    // Scroll tracking & kinetic scroll energy
     let scrollY = window.scrollY;
     let targetScrollY = scrollY;
+    let lastScrollY = scrollY;
+    let scrollEnergy = 0;
+
+    // Floating particles pool
+    const particles: StardustParticle[] = [];
+    let lastSpawnTime = 0;
+
+    const spawnParticles = (x: number, y: number, count = 2) => {
+      if (particles.length > 40) particles.splice(0, count);
+      for (let i = 0; i < count; i++) {
+        const angle = Math.random() * Math.PI * 2;
+        const speed = Math.random() * 1.5 + 0.4;
+        particles.push({
+          x: x + (Math.random() - 0.5) * 15,
+          y: y + (Math.random() - 0.5) * 15,
+          vx: Math.cos(angle) * speed,
+          vy: Math.sin(angle) * speed - 0.3,
+          life: 1.0,
+          maxLife: Math.random() * 30 + 25,
+          size: Math.random() * 2.5 + 1.2,
+          alpha: Math.random() * 0.5 + 0.3,
+        });
+      }
+    };
 
     const handlePointerMove = (e: PointerEvent) => {
       targetPointerX = e.clientX;
       targetPointerY = e.clientY;
-      targetIntensity = 1.0;
+      targetActivity = 1.4;
+
+      const dist = Math.hypot(e.clientX - lastPointerX, e.clientY - lastPointerY);
+      const now = performance.now();
+      if (dist > 15 && now - lastSpawnTime > 40) {
+        lastSpawnTime = now;
+        spawnParticles(e.clientX, e.clientY, 1);
+        lastPointerX = e.clientX;
+        lastPointerY = e.clientY;
+      }
     };
 
     const handleTouchMove = (e: TouchEvent) => {
       if (e.touches.length > 0) {
-        targetPointerX = e.touches[0].clientX;
-        targetPointerY = e.touches[0].clientY;
-        targetIntensity = 1.0;
+        const touch = e.touches[0];
+        targetPointerX = touch.clientX;
+        targetPointerY = touch.clientY;
+        targetActivity = 1.5;
+
+        const dist = Math.hypot(touch.clientX - lastPointerX, touch.clientY - lastPointerY);
+        const now = performance.now();
+        if (dist > 12 && now - lastSpawnTime > 35) {
+          lastSpawnTime = now;
+          spawnParticles(touch.clientX, touch.clientY, 2);
+          lastPointerX = touch.clientX;
+          lastPointerY = touch.clientY;
+        }
       }
     };
 
     const handleTouchStart = (e: TouchEvent) => {
       if (e.touches.length > 0) {
-        targetPointerX = e.touches[0].clientX;
-        targetPointerY = e.touches[0].clientY;
+        const touch = e.touches[0];
+        targetPointerX = touch.clientX;
+        targetPointerY = touch.clientY;
         pointerX = targetPointerX;
         pointerY = targetPointerY;
-        targetIntensity = 1.2;
+        targetActivity = 1.6;
+        spawnParticles(touch.clientX, touch.clientY, 4);
       }
     };
 
     const handleScroll = () => {
-      targetScrollY = window.scrollY;
-      targetIntensity = Math.min(targetIntensity + 0.15, 1.1);
+      const currentScrollY = window.scrollY;
+      const delta = Math.abs(currentScrollY - lastScrollY);
+      lastScrollY = currentScrollY;
+      targetScrollY = currentScrollY;
+
+      // Noticeably inject energy on scroll
+      scrollEnergy = Math.min(scrollEnergy + delta * 0.05, 1.8);
+      targetActivity = Math.min(targetActivity + 0.2, 1.6);
     };
 
     window.addEventListener("pointermove", handlePointerMove, { passive: true });
@@ -74,47 +138,50 @@ export const DynamicBackground: React.FC = () => {
     window.addEventListener("touchstart", handleTouchStart, { passive: true });
     window.addEventListener("scroll", handleScroll, { passive: true });
 
-    // Calm, subtle slow-drifting deep dark-bluish ambient light centers
+    // Slow-drifting deep dark-bluish ambient orbs
     const ambientOrbs = [
       {
-        xRatio: 0.25,
-        yRatio: 0.2,
-        radiusRatio: 0.55,
-        vx: 0.15,
-        vy: 0.12,
-        colorInner: "rgba(18, 38, 78, 0.18)",
+        xRatio: 0.22,
+        yRatio: 0.25,
+        radiusRatio: 0.65,
+        vx: 0.18,
+        vy: 0.14,
+        parallax: 0.22,
+        colorInner: "rgba(22, 52, 112, 0.32)",
         colorOuter: "rgba(2, 5, 11, 0)",
       },
       {
         xRatio: 0.78,
         yRatio: 0.55,
-        radiusRatio: 0.5,
-        vx: -0.12,
-        vy: 0.14,
-        colorInner: "rgba(14, 30, 64, 0.15)",
+        radiusRatio: 0.58,
+        vx: -0.15,
+        vy: 0.16,
+        parallax: 0.30,
+        colorInner: "rgba(28, 64, 138, 0.28)",
         colorOuter: "rgba(2, 5, 11, 0)",
       },
       {
-        xRatio: 0.45,
+        xRatio: 0.42,
         yRatio: 0.85,
-        radiusRatio: 0.48,
-        vx: 0.14,
-        vy: -0.11,
-        colorInner: "rgba(12, 26, 56, 0.16)",
+        radiusRatio: 0.54,
+        vx: 0.16,
+        vy: -0.14,
+        parallax: 0.18,
+        colorInner: "rgba(18, 42, 92, 0.30)",
         colorOuter: "rgba(2, 5, 11, 0)",
       },
       {
-        xRatio: 0.85,
-        yRatio: 0.15,
-        radiusRatio: 0.42,
-        vx: -0.1,
-        vy: -0.1,
-        colorInner: "rgba(22, 46, 92, 0.14)",
+        xRatio: 0.82,
+        yRatio: 0.18,
+        radiusRatio: 0.48,
+        vx: -0.12,
+        vy: -0.12,
+        parallax: 0.26,
+        colorInner: "rgba(32, 76, 160, 0.26)",
         colorOuter: "rgba(2, 5, 11, 0)",
       },
     ];
 
-    // Current positions of ambient orbs
     const orbPositions = ambientOrbs.map((orb) => ({
       x: width * orb.xRatio,
       y: height * orb.yRatio,
@@ -128,27 +195,28 @@ export const DynamicBackground: React.FC = () => {
       if (isDestroyed) return;
 
       // Smooth lerp pointer and scroll
-      pointerX += (targetPointerX - pointerX) * 0.06;
-      pointerY += (targetPointerY - pointerY) * 0.06;
+      pointerX += (targetPointerX - pointerX) * 0.08;
+      pointerY += (targetPointerY - pointerY) * 0.08;
       scrollY += (targetScrollY - scrollY) * 0.08;
 
-      // Smooth decay of pointer activity back to baseline
-      targetIntensity = Math.max(0.6, targetIntensity * 0.985);
-      pointerIntensity += (targetIntensity - pointerIntensity) * 0.05;
+      // Smooth decay of activity & scroll energy
+      targetActivity = Math.max(0.8, targetActivity * 0.98);
+      pointerActivity += (targetActivity - pointerActivity) * 0.06;
+      scrollEnergy *= 0.92;
 
-      time += shouldReduceMotion ? 0 : 0.01;
+      time += shouldReduceMotion ? 0 : 0.012;
 
       ctx.clearRect(0, 0, width, height);
 
-      // 1. Deep stealth dark-blue base background (much darker)
+      // 1. Deep stealth dark-blue base background
       const baseGrad = ctx.createLinearGradient(0, 0, 0, height);
-      baseGrad.addColorStop(0, "#02050b");    // Deepest Midnight Abyss
-      baseGrad.addColorStop(0.5, "#040813");  // Stealth Dark Navy-Black
-      baseGrad.addColorStop(1, "#060b17");    // Deep Obsidian Night Blue
+      baseGrad.addColorStop(0, "#02050b");
+      baseGrad.addColorStop(0.5, "#040813");
+      baseGrad.addColorStop(1, "#060b17");
       ctx.fillStyle = baseGrad;
       ctx.fillRect(0, 0, width, height);
 
-      // 2. Render calm, soft drifting dark-blue ambient glow orbs
+      // 2. Render ambient dark-blue orbs with noticeable scroll parallax
       ambientOrbs.forEach((orb, i) => {
         const pos = orbPositions[i];
 
@@ -156,14 +224,17 @@ export const DynamicBackground: React.FC = () => {
           pos.x += pos.vx;
           pos.y += pos.vy;
 
-          if (pos.x < width * 0.05 || pos.x > width * 0.95) pos.vx *= -1;
-          if (pos.y < height * 0.05 || pos.y > height * 0.95) pos.vy *= -1;
+          if (pos.x < width * 0.02 || pos.x > width * 0.98) pos.vx *= -1;
+          if (pos.y < height * 0.02 || pos.y > height * 0.98) pos.vy *= -1;
         }
 
-        // Slight scroll parallax
-        const scrollShift = (scrollY * (0.05 + i * 0.02)) % height;
-        const renderY = (pos.y - scrollShift + height) % height;
-        const radius = Math.max(width, height) * orb.radiusRatio;
+        // Noticeable vertical scroll parallax
+        const scrollOffset = (scrollY * orb.parallax) % (height * 1.5);
+        const renderY = (pos.y - scrollOffset + height * 1.5) % height;
+
+        // Dynamic expansion during scroll / activity surge
+        const dynamicBoost = 1.0 + scrollEnergy * 0.25;
+        const radius = Math.max(width, height) * orb.radiusRatio * dynamicBoost;
 
         const orbGrad = ctx.createRadialGradient(
           pos.x,
@@ -180,8 +251,9 @@ export const DynamicBackground: React.FC = () => {
         ctx.fillRect(0, 0, width, height);
       });
 
-      // 3. Subtle Interactive Mouse / Touch Dark-Blue Spotlight
-      const spotlightRadius = Math.min(width, height) * (0.38 + pointerIntensity * 0.06);
+      // 3. Noticeable Interactive Mouse / Touch Spotlight
+      // Noticeably illuminates around cursor and finger
+      const spotlightRadius = Math.min(width, height) * (0.40 + pointerActivity * 0.08);
 
       const spotlight = ctx.createRadialGradient(
         pointerX,
@@ -192,18 +264,76 @@ export const DynamicBackground: React.FC = () => {
         spotlightRadius
       );
 
-      const coreAlpha = 0.10 * pointerIntensity;
-      const midAlpha = 0.05 * pointerIntensity;
+      const coreAlpha = 0.28 * pointerActivity;
+      const midAlpha = 0.16 * pointerActivity;
+      const outerAlpha = 0.08 * pointerActivity;
 
-      spotlight.addColorStop(0, `rgba(56, 189, 248, ${coreAlpha})`);
-      spotlight.addColorStop(0.35, `rgba(30, 68, 140, ${midAlpha})`);
-      spotlight.addColorStop(0.7, `rgba(12, 28, 62, ${midAlpha * 0.4})`);
+      // Radiant electric-blue / cyan ambient spotlight
+      spotlight.addColorStop(0, `rgba(56, 189, 248, ${coreAlpha})`);   // Vibrant cyan glow at cursor center
+      spotlight.addColorStop(0.28, `rgba(37, 99, 235, ${midAlpha})`);  // Electric royal blue
+      spotlight.addColorStop(0.60, `rgba(18, 48, 108, ${outerAlpha})`); // Deep sapphire halo
       spotlight.addColorStop(1, "rgba(2, 5, 11, 0)");
 
       ctx.fillStyle = spotlight;
       ctx.fillRect(0, 0, width, height);
 
-      // 4. Outer edge vignette for deep focus
+      // 4. Subtle Fine Geometric Grid Illuminated around Cursor
+      const gridSize = 56;
+      const gridRadius = 320;
+      const minGridX = Math.max(0, Math.floor((pointerX - gridRadius) / gridSize) * gridSize);
+      const maxGridX = Math.min(width, Math.ceil((pointerX + gridRadius) / gridSize) * gridSize);
+      const minGridY = Math.max(0, Math.floor((pointerY - gridRadius) / gridSize) * gridSize);
+      const maxGridY = Math.min(height, Math.ceil((pointerY + gridRadius) / gridSize) * gridSize);
+
+      for (let x = minGridX; x <= maxGridX; x += gridSize) {
+        const dx = Math.abs(x - pointerX);
+        if (dx < gridRadius) {
+          const alpha = (1 - dx / gridRadius) * 0.15 * pointerActivity;
+          ctx.strokeStyle = `rgba(56, 189, 248, ${alpha})`;
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.moveTo(x, Math.max(0, pointerY - gridRadius));
+          ctx.lineTo(x, Math.min(height, pointerY + gridRadius));
+          ctx.stroke();
+        }
+      }
+
+      for (let y = minGridY; y <= maxGridY; y += gridSize) {
+        const dy = Math.abs(y - pointerY);
+        if (dy < gridRadius) {
+          const alpha = (1 - dy / gridRadius) * 0.15 * pointerActivity;
+          ctx.strokeStyle = `rgba(56, 189, 248, ${alpha})`;
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.moveTo(Math.max(0, pointerX - gridRadius), y);
+          ctx.lineTo(Math.min(width, pointerX + gridRadius), y);
+          ctx.stroke();
+        }
+      }
+
+      // 5. Floating Bioluminescent Stardust Particles on Movement
+      for (let p = particles.length - 1; p >= 0; p--) {
+        const part = particles[p];
+        part.x += part.vx;
+        part.y += part.vy;
+        part.life -= 1 / part.maxLife;
+
+        if (part.life <= 0) {
+          particles.splice(p, 1);
+          continue;
+        }
+
+        const currentAlpha = part.life * part.alpha;
+        ctx.beginPath();
+        ctx.arc(part.x, part.y, part.size * part.life, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(56, 189, 248, ${currentAlpha})`;
+        ctx.shadowColor = "#38bdf8";
+        ctx.shadowBlur = 6;
+        ctx.fill();
+        ctx.shadowBlur = 0;
+      }
+
+      // 6. Deep edge vignette preserving content focus
       const vignette = ctx.createRadialGradient(
         width * 0.5,
         height * 0.5,
@@ -237,11 +367,11 @@ export const DynamicBackground: React.FC = () => {
 
   return (
     <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden" aria-hidden="true">
-      {/* Clean, simple dark-bluish dynamic canvas */}
+      {/* Clean, noticeably interactive dark-bluish canvas */}
       <canvas ref={canvasRef} className="absolute inset-0 w-full h-full block" />
 
-      {/* Subtle fine architectural mesh overlay for tactile depth */}
-      <div className="absolute inset-0 ambient-pattern opacity-25 mix-blend-overlay pointer-events-none" />
+      {/* Ambient pattern overlay */}
+      <div className="absolute inset-0 ambient-pattern opacity-20 mix-blend-overlay pointer-events-none" />
     </div>
   );
 };
