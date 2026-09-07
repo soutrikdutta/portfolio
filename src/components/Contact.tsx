@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import { portfolioConfig } from "../portfolio.config";
-import { Linkedin, Github, Phone, Send, CheckCircle2, AlertCircle, Loader2 } from "lucide-react";
+import { Linkedin, Github, Phone, Send, CheckCircle2, AlertCircle, Loader2, Mail, Copy, ExternalLink } from "lucide-react";
 
 export const Contact: React.FC = () => {
   const shouldReduceMotion = useReducedMotion();
@@ -15,6 +15,12 @@ export const Contact: React.FC = () => {
   const [errors, setErrors] = useState<{ name?: string; email?: string; message?: string }>({});
   const [status, setStatus] = useState<"idle" | "sending" | "success" | "error">("idle");
   const [errorMessage, setErrorMessage] = useState("");
+  const [copied, setCopied] = useState(false);
+  const [lastUrls, setLastUrls] = useState<{ gmailUrl: string; mailtoUrl: string; fullText: string }>({
+    gmailUrl: "",
+    mailtoUrl: "",
+    fullText: "",
+  });
 
   const validate = () => {
     const errs: { name?: string; email?: string; message?: string } = {};
@@ -28,8 +34,8 @@ export const Contact: React.FC = () => {
     }
     if (!formData.message.trim()) {
       errs.message = "Please write a short message";
-    } else if (formData.message.trim().length < 10) {
-      errs.message = "Message must be at least 10 characters";
+    } else if (formData.message.trim().length < 5) {
+      errs.message = "Message must be at least 5 characters";
     }
     setErrors(errs);
     return Object.keys(errs).length === 0;
@@ -43,6 +49,18 @@ export const Contact: React.FC = () => {
     }
   };
 
+  const copyToClipboard = async (text: string) => {
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(text);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2500);
+      }
+    } catch {
+      // Ignore copy error
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validate()) return;
@@ -50,12 +68,44 @@ export const Contact: React.FC = () => {
     setStatus("sending");
     setErrorMessage("");
 
+    const recipient = portfolioConfig.contact.email;
+    const subject = `Portfolio Inquiry from ${formData.name.trim()}`;
+    const body = `Hi Soutrik,
+
+${formData.message.trim()}
+
+------------------------------------
+Sender Details:
+Name: ${formData.name.trim()}
+Email: ${formData.email.trim()}`;
+
+    const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(
+      recipient
+    )}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+
+    const mailtoUrl = `mailto:${recipient}?subject=${encodeURIComponent(
+      subject
+    )}&body=${encodeURIComponent(body)}`;
+
+    const fullText = `To: ${recipient}\nSubject: ${subject}\n\n${body}`;
+
+    // 1. Copy formatted text to clipboard automatically
+    await copyToClipboard(fullText);
+
+    // 2. Open Gmail directly in a new tab/window
+    const opened = window.open(gmailUrl, "_blank", "noopener,noreferrer");
+
+    // Fallback if popup is blocked by strict browser setting
+    if (!opened || opened.closed || typeof opened.closed === "undefined") {
+      window.location.href = mailtoUrl;
+    }
+
+    // 3. Fire-and-forget background notification if Web3Forms or endpoint is provided
     try {
       const endpoint = portfolioConfig.contact.formEndpoint;
       const web3FormsKey = portfolioConfig.contact.web3FormsKey;
-
       if (web3FormsKey || (endpoint && !endpoint.includes("api.web3forms.com"))) {
-        const response = await fetch(endpoint, {
+        fetch(endpoint, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -66,26 +116,17 @@ export const Contact: React.FC = () => {
             name: formData.name,
             email: formData.email,
             message: formData.message,
-            subject: `Portfolio Contact from ${formData.name}`,
+            subject: subject,
             from_name: "Portfolio Inquiry",
           }),
-        });
-
-        if (!response.ok) {
-          throw new Error("Failed to send message. Please try again.");
-        }
-      } else {
-        await new Promise((resolve) => setTimeout(resolve, 800));
+        }).catch(() => {});
       }
-
-      setStatus("success");
-      setFormData({ name: "", email: "", message: "" });
-    } catch (err: unknown) {
-      setStatus("error");
-      setErrorMessage(
-        err instanceof Error ? err.message : "Something went wrong. Please try emailing directly."
-      );
+    } catch {
+      // Non-blocking
     }
+
+    setLastUrls({ gmailUrl, mailtoUrl, fullText });
+    setStatus("success");
   };
 
   return (
@@ -152,20 +193,64 @@ export const Contact: React.FC = () => {
           className="p-6 sm:p-8 rounded-2xl bg-[#0e121b]/65 backdrop-blur-xl border border-white/[0.09] shadow-[0_8px_32px_rgba(0,0,0,0.35)] max-w-xl"
         >
           {status === "success" ? (
-            <div className="py-8 text-center space-y-3">
-              <div className="w-10 h-10 mx-auto rounded-full bg-emerald-500/10 border border-emerald-500/25 flex items-center justify-center text-emerald-400">
-                <CheckCircle2 className="w-5 h-5" />
+            <div className="py-6 text-center space-y-4">
+              <div className="w-12 h-12 mx-auto rounded-full bg-sky-500/15 border border-sky-500/30 flex items-center justify-center text-sky-400 shadow-[0_0_20px_rgba(56,189,248,0.2)]">
+                <CheckCircle2 className="w-6 h-6" />
               </div>
-              <p className="text-sm font-medium text-white">
-                Message sent. I&apos;ll get back to you soon.
-              </p>
-              <button
-                type="button"
-                onClick={() => setStatus("idle")}
-                className="text-xs text-zinc-400 hover:text-zinc-200 underline underline-offset-4 transition-colors pt-2"
-              >
-                Send another message
-              </button>
+              <div className="space-y-1.5">
+                <p className="text-base font-semibold text-white">
+                  Opening in Gmail...
+                </p>
+                <p className="text-xs sm:text-sm text-zinc-300 max-w-md mx-auto leading-relaxed">
+                  Your message has been formatted, copied to your clipboard, and opened in Gmail ready to send to{" "}
+                  <span className="text-sky-300 font-mono text-xs">{portfolioConfig.contact.email}</span>.
+                </p>
+              </div>
+
+              {/* Quick action buttons if popup was blocked or to re-open */}
+              <div className="flex flex-wrap items-center justify-center gap-2.5 pt-2">
+                {lastUrls.gmailUrl && (
+                  <a
+                    href={lastUrls.gmailUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-medium text-white bg-sky-500/20 hover:bg-sky-500/30 border border-sky-500/40 hover:border-sky-500/60 transition-all duration-200 shadow-sm"
+                  >
+                    <span>Open in Gmail ↗</span>
+                    <ExternalLink className="w-3.5 h-3.5" />
+                  </a>
+                )}
+                <button
+                  type="button"
+                  onClick={() => copyToClipboard(lastUrls.fullText)}
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs text-zinc-300 hover:text-white bg-white/[0.05] hover:bg-white/[0.09] border border-white/[0.1] hover:border-white/[0.2] transition-all duration-200 shadow-sm"
+                >
+                  <Copy className="w-3.5 h-3.5 text-zinc-400" />
+                  <span>{copied ? "Copied to Clipboard!" : "Copy Message"}</span>
+                </button>
+                {lastUrls.mailtoUrl && (
+                  <a
+                    href={lastUrls.mailtoUrl}
+                    className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs text-zinc-400 hover:text-zinc-200 bg-white/[0.02] hover:bg-white/[0.06] border border-white/[0.06] transition-all duration-200"
+                  >
+                    <Mail className="w-3.5 h-3.5 text-zinc-400" />
+                    <span>Default Mail App</span>
+                  </a>
+                )}
+              </div>
+
+              <div className="pt-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setStatus("idle");
+                    setFormData({ name: "", email: "", message: "" });
+                  }}
+                  className="text-xs text-zinc-500 hover:text-zinc-300 underline underline-offset-4 transition-colors"
+                >
+                  Write another message
+                </button>
+              </div>
             </div>
           ) : (
             <form onSubmit={handleSubmit} noValidate className="space-y-4">
@@ -259,7 +344,7 @@ export const Contact: React.FC = () => {
               )}
 
               {/* Submit Button */}
-              <div className="pt-2">
+              <div className="pt-2 space-y-2">
                 <motion.button
                   type="submit"
                   disabled={status === "sending"}
@@ -270,7 +355,7 @@ export const Contact: React.FC = () => {
                   {status === "sending" ? (
                     <>
                       <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                      <span>Sending...</span>
+                      <span>Opening Gmail...</span>
                     </>
                   ) : (
                     <>
@@ -279,6 +364,9 @@ export const Contact: React.FC = () => {
                     </>
                   )}
                 </motion.button>
+                <p className="text-[11px] text-zinc-500">
+                  Opens Gmail with your message ready to send to {portfolioConfig.contact.email}
+                </p>
               </div>
             </form>
           )}
