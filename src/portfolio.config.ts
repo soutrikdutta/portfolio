@@ -155,7 +155,8 @@ export const portfolioConfig = {
       date: "2026",
       credentialId: "6a694a24-d6c0-4423-9271-fcff2dc46187",
       link: "https://www.credly.com/badges/6a694a24-d6c0-4423-9271-fcff2dc46187/public_url",
-      imageUrl: "/certifications/google-cloud-badge.png"
+      imageUrl: "/certifications/google-cloud-badge.png",
+      certificateUrl: "/certifications/google-cloud-network-cert.png"
     },
     {
       title: "Implement Load Balancing on Compute Engine",
@@ -163,7 +164,8 @@ export const portfolioConfig = {
       date: "2026",
       credentialId: "4d85a1f3-b393-47ac-84bf-21eec6469a29",
       link: "https://www.credly.com/badges/4d85a1f3-b393-47ac-84bf-21eec6469a29/public_url",
-      imageUrl: "/certifications/google-cloud-load-balancing.png"
+      imageUrl: "/certifications/google-cloud-load-balancing.png",
+      certificateUrl: "/certifications/google-cloud-load-balancing-cert.png"
     },
     {
       title: "Prepare Data for ML APIs on Google Cloud",
@@ -171,7 +173,8 @@ export const portfolioConfig = {
       date: "2026",
       credentialId: "8f8f81da-729e-4fb9-bb62-01cdbce57c06",
       link: "https://www.credly.com/badges/8f8f81da-729e-4fb9-bb62-01cdbce57c06/public_url",
-      imageUrl: "/certifications/google-cloud-ml-apis.png"
+      imageUrl: "/certifications/google-cloud-ml-apis.png",
+      certificateUrl: "/certifications/google-cloud-ml-apis-cert.png"
     },
     {
       title: "Set Up an App Dev Environment on Google Cloud",
@@ -179,7 +182,8 @@ export const portfolioConfig = {
       date: "2026",
       credentialId: "af945efe-dddb-47f8-9dea-de62b43b9748",
       link: "https://www.credly.com/badges/af945efe-dddb-47f8-9dea-de62b43b9748/public_url",
-      imageUrl: "/certifications/google-cloud-app-dev.png"
+      imageUrl: "/certifications/google-cloud-app-dev.png",
+      certificateUrl: "/certifications/google-cloud-app-dev-cert.png"
     },
     {
       title: "Gemini Certified Student (University)",
