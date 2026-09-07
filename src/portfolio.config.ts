@@ -41,6 +41,7 @@ export interface CertificationItem {
   credentialId?: string;
   link?: string;
   skills: string[];
+  imageUrl?: string;
 }
 
 
@@ -148,6 +149,15 @@ export const portfolioConfig = {
 
   certifications: [
     {
+      title: "Build a Secure Google Cloud Network",
+      issuer: "Google Cloud",
+      date: "2026",
+      credentialId: "6a694a24-d6c0-4423-9271-fcff2dc46187",
+      link: "https://www.credly.com/badges/6a694a24-d6c0-4423-9271-fcff2dc46187/public_url",
+      imageUrl: "/certifications/google-cloud-badge.png",
+      skills: ["Google Cloud", "Network Security", "Cloud Armor", "VPC Firewalls", "Cloud IAM"]
+    },
+    {
       title: "Front-End Web Development",
       issuer: "Meta / Coursera",
       date: "2025",
@@ -162,14 +172,6 @@ export const portfolioConfig = {
       credentialId: "UMICH-PY-43210",
       link: "https://coursera.org",
       skills: ["Python", "Data Structures", "APIs", "Algorithms"]
-    },
-    {
-      title: "Firebase & Cloud Web Fundamentals",
-      issuer: "Google Cloud Skills Boost",
-      date: "2026",
-      credentialId: "GCLOUD-FB-77123",
-      link: "https://cloudskillsboost.google",
-      skills: ["Firebase", "Cloud Firestore", "Authentication", "Hosting"]
     },
     {
       title: "Foundations of Generative AI for Developers",

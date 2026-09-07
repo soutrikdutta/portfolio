@@ -72,9 +72,16 @@ export const Certifications: React.FC = () => {
               </span>
             </div>
 
-            <span className="text-xs font-mono text-zinc-400 group-hover:text-zinc-300 transition-colors bg-white/[0.04] px-2.5 py-1 rounded-full border border-white/[0.06]">
-              {portfolioConfig.certifications.length} Credentials
-            </span>
+            <div className="flex items-center gap-2.5">
+              <img
+                src="/certifications/google-cloud-badge.png"
+                alt="Google Cloud Certified"
+                className="w-7 h-7 rounded-md bg-white p-0.5 object-contain border border-white/20 shadow-sm hidden xs:block"
+              />
+              <span className="text-xs font-mono text-zinc-400 group-hover:text-zinc-300 transition-colors bg-white/[0.04] px-2.5 py-1 rounded-full border border-white/[0.06]">
+                {portfolioConfig.certifications.length} Credentials
+              </span>
+            </div>
           </button>
         </div>
       </motion.div>
@@ -117,7 +124,7 @@ export const Certifications: React.FC = () => {
                     </span>
                   </div>
                   <p className="text-xs text-zinc-400">
-                    Continuous learning across software development, AI, and cloud fundamentals.
+                    Continuous learning across cloud architecture, security, software development, and AI.
                   </p>
                 </div>
 
@@ -150,59 +157,90 @@ export const Certifications: React.FC = () => {
                 {portfolioConfig.certifications.map((cert) => (
                   <div
                     key={cert.title}
-                    className="p-5 sm:p-6 rounded-xl bg-[#111522]/80 border border-white/[0.08] hover:border-white/[0.20] transition-colors space-y-3.5"
+                    className="p-5 sm:p-6 rounded-xl bg-[#111522]/80 border border-white/[0.08] hover:border-white/[0.20] transition-all space-y-4"
                   >
-                    {/* Header: Issuer + Date */}
-                    <div className="flex items-center justify-between gap-2 text-xs">
-                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/[0.04] border border-white/[0.08] text-zinc-200">
-                        <BadgeCheck className="w-4 h-4 text-sky-400" />
-                        <span className="font-medium text-xs">{cert.issuer}</span>
-                      </span>
+                    <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+                      <div className="space-y-3 flex-1 min-w-0">
+                        {/* Header: Issuer + Date */}
+                        <div className="flex items-center justify-between gap-2 text-xs">
+                          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/[0.04] border border-white/[0.08] text-zinc-200">
+                            <BadgeCheck className="w-4 h-4 text-sky-400" />
+                            <span className="font-medium text-xs">{cert.issuer}</span>
+                          </span>
 
-                      <span className="text-xs font-mono text-zinc-400">
-                        {cert.date}
-                      </span>
-                    </div>
+                          <span className="text-xs font-mono text-zinc-400">
+                            {cert.date}
+                          </span>
+                        </div>
 
-                    {/* Title and verification link */}
-                    <div className="space-y-1">
-                      <h4 className="text-base sm:text-lg font-semibold text-white">
-                        {cert.title}
-                      </h4>
+                        {/* Title and credential ID */}
+                        <div className="space-y-1">
+                          <h4 className="text-base sm:text-lg font-semibold text-white">
+                            {cert.title}
+                          </h4>
 
-                      {cert.credentialId && (
-                        <p className="text-xs font-mono text-zinc-400 flex items-center gap-1.5">
-                          <ShieldCheck className="w-3.5 h-3.5 text-zinc-400 shrink-0" />
-                          <span>Credential ID: {cert.credentialId}</span>
-                        </p>
+                          {cert.credentialId && (
+                            <p className="text-xs font-mono text-zinc-400 flex items-center gap-1.5">
+                              <ShieldCheck className="w-3.5 h-3.5 text-zinc-400 shrink-0" />
+                              <span>Credential ID: {cert.credentialId}</span>
+                            </p>
+                          )}
+                        </div>
+
+                        {/* Skills pills */}
+                        {cert.skills && cert.skills.length > 0 && (
+                          <div className="flex flex-wrap gap-1.5 pt-1">
+                            {cert.skills.map((skill) => (
+                              <span
+                                key={skill}
+                                className="px-2.5 py-0.5 rounded-full text-xs font-mono bg-white/[0.04] border border-white/[0.08] text-zinc-300"
+                              >
+                                {skill}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Badge image preview if present */}
+                      {cert.imageUrl && (
+                        <div className="shrink-0 self-start sm:self-center">
+                          <a
+                            href={cert.link}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="group/badge block p-1.5 rounded-xl bg-white/[0.06] hover:bg-white/[0.12] border border-white/[0.12] hover:border-sky-400/50 transition-all shadow-md"
+                            title={`Verify ${cert.title} on Credly`}
+                          >
+                            <img
+                              src={cert.imageUrl}
+                              alt={cert.title}
+                              className="w-24 h-24 sm:w-28 sm:h-28 object-contain rounded-lg bg-white p-1 transition-transform duration-200 group-hover/badge:scale-105"
+                              loading="lazy"
+                            />
+                            <div className="mt-1 text-center">
+                              <span className="text-[10px] font-mono text-sky-400 group-hover/badge:text-sky-300 flex items-center justify-center gap-1">
+                                <span>Credly</span>
+                                <ExternalLink className="w-2.5 h-2.5" />
+                              </span>
+                            </div>
+                          </a>
+                        </div>
                       )}
                     </div>
 
-                    {/* Skills pills */}
-                    {cert.skills && cert.skills.length > 0 && (
-                      <div className="flex flex-wrap gap-1.5 pt-1">
-                        {cert.skills.map((skill) => (
-                          <span
-                            key={skill}
-                            className="px-2.5 py-0.5 rounded-full text-xs font-mono bg-white/[0.04] border border-white/[0.08] text-zinc-300"
-                          >
-                            {skill}
-                          </span>
-                        ))}
-                      </div>
-                    )}
-
-                    {/* Show Credential Link */}
+                    {/* Verify Credential Button */}
                     {cert.link && (
-                      <div className="pt-2 border-t border-white/[0.04]">
+                      <div className="pt-2 border-t border-white/[0.06] flex items-center justify-between">
                         <a
                           href={cert.link}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1.5 text-xs font-medium text-sky-400 hover:text-sky-300 transition-colors"
+                          className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-medium text-sky-400 hover:text-white bg-sky-500/10 hover:bg-sky-500/25 border border-sky-500/30 hover:border-sky-500/50 transition-all duration-200 shadow-sm"
                         >
-                          <span>Show Credential</span>
-                          <ExternalLink className="w-3.5 h-3.5" />
+                          <ShieldCheck className="w-3.5 h-3.5 text-sky-400" />
+                          <span>Verify Credential</span>
+                          <ExternalLink className="w-3 h-3 text-sky-400" />
                         </a>
                       </div>
                     )}
