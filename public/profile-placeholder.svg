@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#141824"/>
+      <stop offset="100%" stop-color="#0c0e15"/>
+    </linearGradient>
+    <linearGradient id="strokeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="rgba(255,255,255,0.2)"/>
+      <stop offset="100%" stop-color="rgba(255,255,255,0.05)"/>
+    </linearGradient>
+  </defs>
+  <rect width="200" height="200" rx="40" fill="url(#bgGrad)"/>
+  <rect width="198" height="198" x="1" y="1" rx="39" fill="none" stroke="url(#strokeGrad)" stroke-width="2"/>
+  
+  <!-- Subtle minimalist avatar silhouette -->
+  <g fill="none" stroke="#717a90" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.8">
+    <circle cx="100" cy="78" r="32"/>
+    <path d="M42 166c0-32 26-52 58-52s58 20 58 52"/>
+  </g>
+</svg>
