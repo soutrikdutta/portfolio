@@ -158,6 +158,15 @@ export const portfolioConfig = {
       skills: ["Google Cloud", "Network Security", "Cloud Armor", "VPC Firewalls", "Cloud IAM"]
     },
     {
+      title: "Implement Load Balancing on Compute Engine",
+      issuer: "Google Cloud",
+      date: "2026",
+      credentialId: "4d85a1f3-b393-47ac-84bf-21eec6469a29",
+      link: "https://www.credly.com/badges/4d85a1f3-b393-47ac-84bf-21eec6469a29/public_url",
+      imageUrl: "/certifications/google-cloud-load-balancing.png",
+      skills: ["Compute Engine", "Load Balancing", "Cloud Shell", "Virtual Machines", "GKE"]
+    },
+    {
       title: "Front-End Web Development",
       issuer: "Meta / Coursera",
       date: "2025",

@@ -73,11 +73,20 @@ export const Certifications: React.FC = () => {
             </div>
 
             <div className="flex items-center gap-2.5">
-              <img
-                src="/certifications/google-cloud-badge.png"
-                alt="Google Cloud Certified"
-                className="w-7 h-7 rounded-md bg-white p-0.5 object-contain border border-white/20 shadow-sm hidden xs:block"
-              />
+              <div className="hidden xs:flex items-center -space-x-1.5">
+                <img
+                  src="/certifications/google-cloud-badge.png"
+                  alt="Build a Secure Google Cloud Network"
+                  className="w-7 h-7 rounded-md bg-white p-0.5 object-contain border border-white/20 shadow-sm"
+                  title="Build a Secure Google Cloud Network"
+                />
+                <img
+                  src="/certifications/google-cloud-load-balancing.png"
+                  alt="Implement Load Balancing on Compute Engine"
+                  className="w-7 h-7 rounded-md bg-white p-0.5 object-contain border border-white/20 shadow-sm"
+                  title="Implement Load Balancing on Compute Engine"
+                />
+              </div>
               <span className="text-xs font-mono text-zinc-400 group-hover:text-zinc-300 transition-colors bg-white/[0.04] px-2.5 py-1 rounded-full border border-white/[0.06]">
                 {portfolioConfig.certifications.length} Credentials
               </span>
