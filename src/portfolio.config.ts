@@ -187,8 +187,8 @@ export const portfolioConfig = {
     heading: "Let's build something.",
     subtext: "Have an idea, opportunity, or just want to say hello?",
     email: "2006soutrik@gmail.com",
-    phone: "+919876543210", // Phone dialer direct link
-    phoneDisplay: "+91 (Direct Dial)",
+    phone: "+918902281688", // Direct mobile dialer link
+    phoneDisplay: "+91 89022 81688",
     socialLinks: {
       github: "https://github.com/soutrikdutta",
       linkedin: "https://www.linkedin.com/in/soutrik-dutta-245b93372/",
