@@ -51,9 +51,9 @@ export const portfolioConfig = {
     name: "Soutrik Dutta",
     eyebrow: "ENGINEERING STUDENT · DEVELOPER",
     headline: "Hi, I'm Soutrik Dutta",
-    intro: "Engineering student building websites, apps, and software with clean code.",
+    intro: "I turn ideas into modern, functional digital experiences.",
     location: "Kolkata, India",
-    currentStatus: "Open for opportunities & collaborations",
+    currentStatus: "Available for opportunities & collaborations",
     timezone: "Asia/Kolkata",
     avatarUrl: "/profile.jpg",
   },
@@ -102,6 +102,14 @@ export const portfolioConfig = {
       githubUrl: "https://github.com/soutrikdutta/skillgrad",
       liveUrl: "https://skillgrad.vercel.app",
       featured: true
+    },
+    {
+      id: "02",
+      title: "SHARODSHAV",
+      tagline: "A smart Durga Puja planning platform that helps users discover pandals, plan visits, explore nearby places, and navigate the festivities more efficiently.",
+      technologies: ["React", "TypeScript", "Tailwind CSS", "Geolocation", "Vite"],
+      liveUrl: "https://pujo-planner-weld.vercel.app",
+      featured: true
     }
   ] as ProjectItem[],
 
@@ -118,6 +126,19 @@ export const portfolioConfig = {
   ],
 
   achievements: [
+    {
+      title: "SHARODSHAV — HackRIT 24-Hour Hackathon",
+      category: "Competition & Innovation",
+      date: "2026",
+      description: "Developed SHARODSHAV, a smart Durga Puja planning platform that helps users discover pandals, plan their visits, explore nearby places, and navigate the festivities more efficiently. Built during HackRIT, a 24-hour hackathon under DEVx 2.0 at Techno India University.",
+      highlight: "DEVX 2.0 x GDG on campus TIU",
+      link: "#",
+      linkLabel: "Read Article",
+      imageUrl: "/achievements/sharodshav-hackrit.jpg",
+      images: [
+        "/achievements/sharodshav-hackrit.jpg"
+      ]
+    },
     {
       title: "Smart Bus — Sandbox CCU 2025",
       category: "Innovation & Smart Transit",
