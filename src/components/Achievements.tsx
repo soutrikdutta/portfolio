@@ -60,8 +60,8 @@ export const Achievements: React.FC = () => {
           </p>
         </motion.div>
 
-        {/* Achievements Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5 sm:gap-6">
+        {/* Achievements Cards (Centered when odd number of items) */}
+        <div className="flex flex-wrap justify-center gap-5 sm:gap-6">
           {portfolioConfig.achievements.map((item, index) => {
             const imageList = item.images && item.images.length > 0
               ? item.images
@@ -82,7 +82,7 @@ export const Achievements: React.FC = () => {
                   ease: "easeOut",
                 }}
                 whileHover={shouldReduceMotion ? {} : { y: -2 }}
-                className="group relative flex flex-col justify-between p-5 sm:p-6 rounded-2xl bg-[#0e121b]/60 hover:bg-[#111522]/80 backdrop-blur-sm border border-white/[0.08] hover:border-white/[0.22] shadow-[0_8px_30px_rgba(0,0,0,0.35)] hover:shadow-[0_12px_36px_rgba(0,0,0,0.5)] transition-all duration-300 overflow-hidden"
+                className="w-full md:w-[calc(50%-0.75rem)] group relative flex flex-col justify-between p-5 sm:p-6 rounded-2xl bg-[#0e121b]/60 hover:bg-[#111522]/80 backdrop-blur-sm border border-white/[0.08] hover:border-white/[0.22] shadow-[0_8px_30px_rgba(0,0,0,0.35)] hover:shadow-[0_12px_36px_rgba(0,0,0,0.5)] transition-all duration-300 overflow-hidden"
               >
                 <div className="space-y-4">
                   {/* Dedicated Image Frame Space (supports single image or multi-image carousel) */}
