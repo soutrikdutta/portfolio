@@ -108,6 +108,7 @@ export const portfolioConfig = {
       title: "SHARODSHAV",
       tagline: "A smart Durga Puja planning platform that helps users discover pandals, plan visits, explore nearby places, and navigate the festivities more efficiently.",
       technologies: ["React", "TypeScript", "Tailwind CSS", "Geolocation", "Vite"],
+      githubUrl: "https://github.com/soutrikdutta/sharodshava-pujo-planner",
       liveUrl: "https://pujo-planner-weld.vercel.app",
       featured: true
     }
