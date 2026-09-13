@@ -39,16 +39,22 @@ export const Certifications: React.FC = () => {
       <motion.div
         initial={{ opacity: 0, y: shouldReduceMotion ? 0 : 20 }}
         whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, margin: "-100px" }}
+        viewport={{ once: false, margin: "-80px" }}
         transition={{ duration: 0.5 }}
         className="space-y-6"
       >
         {/* Section Header */}
-        <div className="space-y-2">
+        <motion.div
+          initial={shouldReduceMotion ? false : { opacity: 0, x: -30 }}
+          whileInView={{ opacity: 1, x: 0 }}
+          viewport={{ once: false, margin: "-60px" }}
+          transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+          className="space-y-2"
+        >
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight text-white">
             Certifications
           </h2>
-        </div>
+        </motion.div>
 
         {/* Sentence above the box */}
         <p className="text-sm sm:text-base text-zinc-400 max-w-2xl leading-relaxed">
@@ -253,7 +259,7 @@ export const Certifications: React.FC = () => {
                         >
                           <ShieldCheck className="w-3.5 h-3.5 text-sky-400" />
                           <span>Verify Credential</span>
-                          <ExternalLink className="w-3 h-3 text-sky-400" />
+                          <ExternalLink className="w-3.5 h-3.5 text-sky-400" />
                         </a>
                       )}
 
@@ -265,7 +271,7 @@ export const Certifications: React.FC = () => {
                           className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-medium text-zinc-300 hover:text-white bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.1] hover:border-white/[0.22] transition-all duration-200 shadow-sm"
                         >
                           <span>View Certificate</span>
-                          <ExternalLink className="w-3 h-3 text-zinc-400" />
+                          <ExternalLink className="w-3.5 h-3.5 text-zinc-400" />
                         </a>
                       )}
                     </div>

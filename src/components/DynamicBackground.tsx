@@ -1,17 +1,6 @@
 import React, { useEffect, useRef } from "react";
 import { useReducedMotion } from "framer-motion";
 
-interface StardustParticle {
-  x: number;
-  y: number;
-  vx: number;
-  vy: number;
-  life: number;
-  maxLife: number;
-  size: number;
-  alpha: number;
-}
-
 export const DynamicBackground: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const shouldReduceMotion = useReducedMotion();
@@ -42,8 +31,6 @@ export const DynamicBackground: React.FC = () => {
     let pointerY = height * 0.35;
     let targetPointerX = pointerX;
     let targetPointerY = pointerY;
-    let lastPointerX = pointerX;
-    let lastPointerY = pointerY;
 
     // Pointer activity that surges on movement and relaxes
     let pointerActivity = 0.8;
@@ -55,41 +42,10 @@ export const DynamicBackground: React.FC = () => {
     let lastScrollY = scrollY;
     let scrollEnergy = 0;
 
-    // Floating particles pool
-    const particles: StardustParticle[] = [];
-    let lastSpawnTime = 0;
-
-    const spawnParticles = (x: number, y: number, count = 2) => {
-      if (particles.length > 40) particles.splice(0, count);
-      for (let i = 0; i < count; i++) {
-        const angle = Math.random() * Math.PI * 2;
-        const speed = Math.random() * 1.5 + 0.4;
-        particles.push({
-          x: x + (Math.random() - 0.5) * 15,
-          y: y + (Math.random() - 0.5) * 15,
-          vx: Math.cos(angle) * speed,
-          vy: Math.sin(angle) * speed - 0.3,
-          life: 1.0,
-          maxLife: Math.random() * 30 + 25,
-          size: Math.random() * 2.5 + 1.2,
-          alpha: Math.random() * 0.5 + 0.3,
-        });
-      }
-    };
-
     const handlePointerMove = (e: PointerEvent) => {
       targetPointerX = e.clientX;
       targetPointerY = e.clientY;
       targetActivity = 1.4;
-
-      const dist = Math.hypot(e.clientX - lastPointerX, e.clientY - lastPointerY);
-      const now = performance.now();
-      if (dist > 15 && now - lastSpawnTime > 40) {
-        lastSpawnTime = now;
-        spawnParticles(e.clientX, e.clientY, 1);
-        lastPointerX = e.clientX;
-        lastPointerY = e.clientY;
-      }
     };
 
     const handleTouchMove = (e: TouchEvent) => {
@@ -98,15 +54,6 @@ export const DynamicBackground: React.FC = () => {
         targetPointerX = touch.clientX;
         targetPointerY = touch.clientY;
         targetActivity = 1.5;
-
-        const dist = Math.hypot(touch.clientX - lastPointerX, touch.clientY - lastPointerY);
-        const now = performance.now();
-        if (dist > 12 && now - lastSpawnTime > 35) {
-          lastSpawnTime = now;
-          spawnParticles(touch.clientX, touch.clientY, 2);
-          lastPointerX = touch.clientX;
-          lastPointerY = touch.clientY;
-        }
       }
     };
 
@@ -118,7 +65,6 @@ export const DynamicBackground: React.FC = () => {
         pointerX = targetPointerX;
         pointerY = targetPointerY;
         targetActivity = 1.6;
-        spawnParticles(touch.clientX, touch.clientY, 4);
       }
     };
 
@@ -277,9 +223,11 @@ export const DynamicBackground: React.FC = () => {
       ctx.fillStyle = spotlight;
       ctx.fillRect(0, 0, width, height);
 
-      // 4. Subtle Fine Geometric Grid Illuminated around Cursor
-      const gridSize = 56;
-      const gridRadius = 320;
+      // 4. Subtle Fine Geometric Grid Illuminated around Cursor (50% less visible on mobile)
+      const isMobile = width < 768;
+      const mobileFactor = isMobile ? 0.5 : 1.0;
+      const gridSize = isMobile ? 64 : 56;
+      const gridRadius = isMobile ? 220 : 320;
       const minGridX = Math.max(0, Math.floor((pointerX - gridRadius) / gridSize) * gridSize);
       const maxGridX = Math.min(width, Math.ceil((pointerX + gridRadius) / gridSize) * gridSize);
       const minGridY = Math.max(0, Math.floor((pointerY - gridRadius) / gridSize) * gridSize);
@@ -288,7 +236,7 @@ export const DynamicBackground: React.FC = () => {
       for (let x = minGridX; x <= maxGridX; x += gridSize) {
         const dx = Math.abs(x - pointerX);
         if (dx < gridRadius) {
-          const alpha = (1 - dx / gridRadius) * 0.15 * pointerActivity;
+          const alpha = (1 - dx / gridRadius) * 0.09 * pointerActivity * mobileFactor;
           ctx.strokeStyle = `rgba(56, 189, 248, ${alpha})`;
           ctx.lineWidth = 1;
           ctx.beginPath();
@@ -301,7 +249,7 @@ export const DynamicBackground: React.FC = () => {
       for (let y = minGridY; y <= maxGridY; y += gridSize) {
         const dy = Math.abs(y - pointerY);
         if (dy < gridRadius) {
-          const alpha = (1 - dy / gridRadius) * 0.15 * pointerActivity;
+          const alpha = (1 - dy / gridRadius) * 0.09 * pointerActivity * mobileFactor;
           ctx.strokeStyle = `rgba(56, 189, 248, ${alpha})`;
           ctx.lineWidth = 1;
           ctx.beginPath();
@@ -311,29 +259,7 @@ export const DynamicBackground: React.FC = () => {
         }
       }
 
-      // 5. Floating Bioluminescent Stardust Particles on Movement
-      for (let p = particles.length - 1; p >= 0; p--) {
-        const part = particles[p];
-        part.x += part.vx;
-        part.y += part.vy;
-        part.life -= 1 / part.maxLife;
-
-        if (part.life <= 0) {
-          particles.splice(p, 1);
-          continue;
-        }
-
-        const currentAlpha = part.life * part.alpha;
-        ctx.beginPath();
-        ctx.arc(part.x, part.y, part.size * part.life, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(56, 189, 248, ${currentAlpha})`;
-        ctx.shadowColor = "#38bdf8";
-        ctx.shadowBlur = 6;
-        ctx.fill();
-        ctx.shadowBlur = 0;
-      }
-
-      // 6. Deep edge vignette preserving content focus
+      // 5. Deep edge vignette preserving content focus
       const vignette = ctx.createRadialGradient(
         width * 0.5,
         height * 0.5,

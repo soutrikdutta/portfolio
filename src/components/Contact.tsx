@@ -132,19 +132,25 @@ Email: ${formData.email.trim()}`;
   return (
     <section
       id="contact"
-      className="py-20 sm:py-28 max-w-4xl mx-auto px-5 sm:px-8 border-t border-white/[0.06]"
+      className="py-20 sm:py-28 max-w-4xl mx-auto px-5 sm:px-8 border-t border-white/[0.06] scroll-mt-20"
       aria-label="Contact section"
     >
       <div className="space-y-10">
-        {/* Heading & Subtext */}
-        <div className="space-y-2">
+        {/* Heading & Subtext with Slide Entrance */}
+        <motion.div
+          initial={shouldReduceMotion ? false : { opacity: 0, x: -30 }}
+          whileInView={{ opacity: 1, x: 0 }}
+          viewport={{ once: false, margin: "-60px" }}
+          transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+          className="space-y-2"
+        >
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight text-white">
             {portfolioConfig.contact.heading}
           </h2>
           <p className="text-xs sm:text-sm text-zinc-400 max-w-md leading-relaxed">
             {portfolioConfig.contact.subtext}
           </p>
-        </div>
+        </motion.div>
 
         {/* Three Compact Actions */}
         <div className="flex flex-wrap items-center gap-2.5">
@@ -188,7 +194,7 @@ Email: ${formData.email.trim()}`;
         <motion.div
           initial={shouldReduceMotion ? false : { opacity: 0, y: 12 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-60px" }}
+          viewport={{ once: false, margin: "-40px" }}
           transition={{ duration: 0.5 }}
           className="p-6 sm:p-8 rounded-2xl bg-[#0e121b]/65 backdrop-blur-xl border border-white/[0.09] shadow-[0_8px_32px_rgba(0,0,0,0.35)] max-w-xl"
         >
