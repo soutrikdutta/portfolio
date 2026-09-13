@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import { portfolioConfig } from "../portfolio.config";
-import { Trophy, Award, ExternalLink, Sparkles, CheckCircle2, Image as ImageIcon, ChevronLeft, ChevronRight } from "lucide-react";
+import { ExternalLink, CheckCircle2, Image as ImageIcon, ChevronLeft, ChevronRight } from "lucide-react";
 
 export const Achievements: React.FC = () => {
   const shouldReduceMotion = useReducedMotion();
@@ -30,19 +30,6 @@ export const Achievements: React.FC = () => {
     }));
   };
 
-  const getCategoryIcon = (category: string) => {
-    switch (category.toLowerCase()) {
-      case "academic":
-      case "education":
-        return <Award className="w-4 h-4 text-emerald-400" />;
-      case "innovation & smart transit":
-      case "project":
-      case "hackathon":
-        return <Trophy className="w-4 h-4 text-amber-400" />;
-      default:
-        return <Sparkles className="w-4 h-4 text-zinc-300" />;
-    }
-  };
 
   return (
     <section
@@ -53,19 +40,25 @@ export const Achievements: React.FC = () => {
       <motion.div
         initial={{ opacity: 0, y: shouldReduceMotion ? 0 : 20 }}
         whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, margin: "-100px" }}
+        viewport={{ once: false, margin: "-80px" }}
         transition={{ duration: 0.5 }}
         className="space-y-10"
       >
         {/* Section Header */}
-        <div className="space-y-2">
+        <motion.div
+          initial={shouldReduceMotion ? false : { opacity: 0, x: -30 }}
+          whileInView={{ opacity: 1, x: 0 }}
+          viewport={{ once: false, margin: "-60px" }}
+          transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+          className="space-y-2"
+        >
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight text-white">
             Achievements
           </h2>
           <p className="text-sm sm:text-base text-zinc-400">
             Milestones, recognitions, and featured project showcases.
           </p>
-        </div>
+        </motion.div>
 
         {/* Achievements Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5 sm:gap-6">
@@ -82,7 +75,7 @@ export const Achievements: React.FC = () => {
                 key={item.title}
                 initial={{ opacity: 0, y: shouldReduceMotion ? 0 : 16 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-50px" }}
+                viewport={{ once: false, margin: "-40px" }}
                 transition={{
                   duration: 0.45,
                   delay: shouldReduceMotion ? 0 : index * 0.08,
@@ -143,23 +136,23 @@ export const Achievements: React.FC = () => {
                             {/* Dots Indicator */}
                             <div className="absolute bottom-2.5 inset-x-0 flex justify-center items-center pointer-events-auto">
                               <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-black/60 backdrop-blur-md border border-white/15 shadow-sm">
-                                {imageList.map((_, imgIdx) => (
-                                  <button
-                                    key={imgIdx}
-                                    type="button"
-                                    onClick={(e) => {
-                                      e.preventDefault();
-                                      e.stopPropagation();
-                                      setActiveImageIndices((prev) => ({ ...prev, [item.title]: imgIdx }));
-                                    }}
-                                    className={`h-1.5 rounded-full transition-all duration-200 ${
-                                      imgIdx === currentIndex
-                                        ? "w-5 bg-white shadow-sm"
-                                        : "w-1.5 bg-white/40 hover:bg-white/70"
-                                    }`}
-                                    aria-label={`Go to slide ${imgIdx + 1}`}
-                                  />
-                                ))}
+                                  {imageList.map((_, imgIdx) => (
+                                    <button
+                                      key={imgIdx}
+                                      type="button"
+                                      onClick={(e) => {
+                                        e.preventDefault();
+                                        e.stopPropagation();
+                                        setActiveImageIndices((prev) => ({ ...prev, [item.title]: imgIdx }));
+                                      }}
+                                      className={`h-1.5 rounded-full transition-all duration-200 ${
+                                        imgIdx === currentIndex
+                                          ? "w-5 bg-white shadow-sm"
+                                          : "w-1.5 bg-white/40 hover:bg-white/70"
+                                      }`}
+                                      aria-label={`Go to slide ${imgIdx + 1}`}
+                                    />
+                                  ))}
                               </div>
                             </div>
                           </div>
@@ -183,17 +176,7 @@ export const Achievements: React.FC = () => {
                     )}
                   </div>
 
-                  {/* Header row: Category Pill + Date */}
-                  <div className="flex items-center justify-between gap-2 text-xs">
-                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/[0.04] border border-white/[0.08] text-zinc-300 group-hover:border-white/[0.16] transition-colors">
-                      {getCategoryIcon(item.category)}
-                      <span className="font-medium text-[11px] sm:text-xs">{item.category}</span>
-                    </span>
 
-                    <span className="text-[11px] font-mono text-zinc-400">
-                      {item.date}
-                    </span>
-                  </div>
 
                   {/* Title */}
                   <div className="space-y-1">
@@ -218,15 +201,24 @@ export const Achievements: React.FC = () => {
                 {/* Bottom Link if present */}
                 {item.link && (
                   <div className="pt-4 mt-3 border-t border-white/[0.04]">
-                    <a
-                      href={item.link}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1.5 text-xs font-medium text-zinc-300 hover:text-white group/link transition-colors"
-                    >
-                      <span>{item.linkLabel || "View Details"}</span>
-                      <ExternalLink className="w-3 h-3 text-zinc-400 group-hover/link:text-white transition-colors" />
-                    </a>
+                    {item.link === "#" ? (
+                      <span className="inline-flex items-center gap-2 text-xs font-medium text-zinc-400 select-none">
+                        <span>{item.linkLabel || "Read Article"}</span>
+                        <span className="text-[10px] font-mono text-zinc-400 bg-white/[0.04] px-2 py-0.5 rounded-full border border-white/[0.06]">
+                          Article Coming Soon
+                        </span>
+                      </span>
+                    ) : (
+                      <a
+                        href={item.link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1.5 text-xs font-medium text-zinc-300 hover:text-white group/link transition-colors"
+                      >
+                        <span>{item.linkLabel || "View Details"}</span>
+                        <ExternalLink className="w-3 h-3 text-zinc-400 group-hover/link:text-white transition-colors" />
+                      </a>
+                    )}
                   </div>
                 )}
               </motion.div>
