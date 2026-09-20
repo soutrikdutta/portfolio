@@ -137,7 +137,8 @@ export const portfolioConfig = {
       linkLabel: "Read Article",
       imageUrl: "/achievements/sharodshav-hackrit.jpg",
       images: [
-        "/achievements/sharodshav-hackrit.jpg"
+        "/achievements/sharodshav-hackrit.jpg",
+        "/achievements/sharodshav-hackrit-2.jpg"
       ]
     },
     {
