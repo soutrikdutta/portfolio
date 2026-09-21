@@ -24,8 +24,9 @@ export const About: React.FC = () => {
         <motion.div
           initial={shouldReduceMotion ? false : { opacity: 0, x: -30 }}
           whileInView={{ opacity: 1, x: 0 }}
-          viewport={{ once: false, margin: "-60px" }}
-          transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+          viewport={{ once: false, margin: "-15px" }}
+          transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+          className="hardware-accelerated"
         >
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight text-white">
             About Me
@@ -44,9 +45,9 @@ export const About: React.FC = () => {
                 key={index}
                 initial={shouldReduceMotion ? false : { opacity: 0, y: 15 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: false, margin: "-40px" }}
-                transition={{ duration: 0.55, delay: index * 0.08, ease: [0.16, 1, 0.3, 1] }}
-                className="hover:text-zinc-100 transition-colors"
+                viewport={{ once: false, margin: "-15px" }}
+                transition={{ duration: 0.45, delay: index * 0.06, ease: [0.16, 1, 0.3, 1] }}
+                className="hover:text-zinc-100 transition-colors hardware-accelerated"
               >
                 {paragraph}
               </motion.p>
@@ -57,10 +58,10 @@ export const About: React.FC = () => {
           <motion.div
             initial={shouldReduceMotion ? false : { opacity: 0, x: 30 }}
             whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: false, margin: "-50px" }}
-            transition={{ duration: 0.65, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
+            viewport={{ once: false, margin: "-15px" }}
+            transition={{ duration: 0.55, delay: 0.08, ease: [0.16, 1, 0.3, 1] }}
             whileHover={shouldReduceMotion ? {} : { y: -3 }}
-            className="md:col-span-5 p-5 sm:p-6 rounded-2xl bg-[#0f121b]/65 hover:bg-[#121622]/85 backdrop-blur-xl border border-white/[0.08] hover:border-white/[0.2] shadow-[0_4px_24px_rgba(0,0,0,0.35)] hover:shadow-[0_12px_36px_rgba(0,0,0,0.45)] transition-all duration-300 space-y-4"
+            className="md:col-span-5 p-5 sm:p-6 rounded-2xl bg-[#0f121b]/80 md:bg-[#0f121b]/65 hover:bg-[#121622]/90 backdrop-blur-md md:backdrop-blur-xl border border-white/[0.08] hover:border-white/[0.2] shadow-[0_4px_24px_rgba(0,0,0,0.35)] hover:shadow-[0_12px_36px_rgba(0,0,0,0.45)] transition-all duration-300 space-y-4 hardware-accelerated"
           >
             <div className="flex items-center justify-between pb-3 border-b border-white/[0.06]">
               <span className="text-xs font-mono uppercase tracking-wider text-zinc-400">

@@ -101,15 +101,20 @@ export const Hero: React.FC = () => {
           x: { duration: 0.25, ease: "easeOut" },
           y: { duration: 0.25, ease: "easeOut" },
         }}
-        className="absolute top-1/4 sm:top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[340px] sm:w-[540px] md:w-[700px] h-[280px] sm:h-[380px] md:h-[450px] bg-gradient-to-tr from-sky-500/25 via-blue-600/20 to-indigo-600/15 blur-[90px] sm:blur-[110px] rounded-full pointer-events-none -z-10"
+        className="hidden sm:block absolute top-1/4 sm:top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[540px] md:w-[700px] h-[380px] md:h-[450px] bg-gradient-to-tr from-sky-500/25 via-blue-600/20 to-indigo-600/15 blur-[90px] md:blur-[110px] rounded-full pointer-events-none -z-10 hardware-accelerated"
         aria-hidden="true"
+      />
+      {/* Mobile Lightweight Static Ambient Glow (No infinite GPU re-rasterization) */}
+      <div 
+        className="sm:hidden absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[280px] h-[240px] bg-sky-500/15 blur-[50px] rounded-full pointer-events-none -z-10 hardware-accelerated" 
+        aria-hidden="true" 
       />
 
       <motion.div
         variants={containerVariants}
         initial="hidden"
         animate="visible"
-        className="flex flex-col md:flex-row items-center md:items-center justify-between gap-6 sm:gap-8 md:gap-12 lg:gap-14 w-full"
+        className="flex flex-col md:flex-row items-center md:items-center justify-between gap-6 sm:gap-8 md:gap-12 lg:gap-14 w-full hardware-accelerated"
       >
         {/* 2. Profile Photo with 3D Mouse Tilt & Floating Motion */}
         <motion.div
@@ -118,7 +123,7 @@ export const Hero: React.FC = () => {
             scale: dpScale,
             y: dpY,
           }}
-          className="order-1 md:order-2 relative shrink-0 self-center will-change-transform pt-1 md:pt-0"
+          className="order-1 md:order-2 relative shrink-0 self-center will-change-transform pt-1 md:pt-0 hardware-accelerated"
         >
           {/* Subtle Float Animation wrapper + 3D Mouse Parallax */}
           <motion.div
@@ -150,6 +155,8 @@ export const Hero: React.FC = () => {
               <img
                 src={portfolioConfig.personal.avatarUrl}
                 alt={portfolioConfig.personal.name}
+                loading="eager"
+                decoding="async"
                 className="w-full h-full object-cover object-top transition-transform duration-700 group-hover:scale-105"
                 onError={(e) => {
                   (e.target as HTMLImageElement).src = "/profile-placeholder.svg";
@@ -190,14 +197,14 @@ export const Hero: React.FC = () => {
                 {nameLetters.map((letter, i) => (
                   <motion.span
                     key={i}
-                    initial={shouldReduceMotion ? false : { opacity: 0, y: 35, rotateX: -40 }}
-                    animate={{ opacity: 1, y: 0, rotateX: 0 }}
+                    initial={shouldReduceMotion ? false : { opacity: 0, y: 25 }}
+                    animate={{ opacity: 1, y: 0 }}
                     transition={{
-                      duration: 0.6,
-                      delay: shouldReduceMotion ? 0 : 0.2 + i * 0.04,
+                      duration: 0.5,
+                      delay: shouldReduceMotion ? 0 : 0.15 + i * 0.03,
                       ease: [0.16, 1, 0.3, 1],
                     }}
-                    className="inline-block text-white font-bold tracking-tight bg-gradient-to-r from-white via-zinc-100 to-zinc-300 bg-clip-text text-transparent drop-shadow-[0_2px_24px_rgba(255,255,255,0.2)] hover:text-sky-300 transition-colors duration-200"
+                    className="inline-block text-white font-bold tracking-tight bg-gradient-to-r from-white via-zinc-100 to-zinc-300 bg-clip-text text-transparent drop-shadow-[0_2px_16px_rgba(255,255,255,0.2)] hover:text-sky-300 transition-colors duration-200"
                   >
                     {letter === " " ? "\u00A0" : letter}
                   </motion.span>

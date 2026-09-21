@@ -35,8 +35,9 @@ export const Projects: React.FC = () => {
         <motion.div
           initial={shouldReduceMotion ? false : { opacity: 0, x: -30 }}
           whileInView={{ opacity: 1, x: 0 }}
-          viewport={{ once: false, margin: "-60px" }}
-          transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+          viewport={{ once: false, margin: "-15px" }}
+          transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+          className="hardware-accelerated"
         >
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/[0.04] border border-white/[0.08] text-[11px] font-mono text-zinc-400 mb-2 shadow-sm">
             <Sparkles className="w-3.5 h-3.5 text-amber-400" />
@@ -55,10 +56,10 @@ export const Projects: React.FC = () => {
           {portfolioConfig.projects.map((project, index) => (
             <motion.article
               key={project.id}
-              initial={shouldReduceMotion ? false : { opacity: 0, y: 35, scale: 0.96 }}
+              initial={shouldReduceMotion ? false : { opacity: 0, y: 25, scale: 0.98 }}
               whileInView={{ opacity: 1, y: 0, scale: 1 }}
-              viewport={{ once: false, margin: "-40px" }}
-              transition={{ duration: 0.6, delay: index * 0.1, ease: [0.16, 1, 0.3, 1] }}
+              viewport={{ once: false, margin: "-15px" }}
+              transition={{ duration: 0.5, delay: index * 0.08, ease: [0.16, 1, 0.3, 1] }}
               onMouseMove={handleMouseMove}
               onMouseLeave={handleMouseLeave}
               animate={
@@ -71,7 +72,7 @@ export const Projects: React.FC = () => {
               }
               style={{ perspective: 1000 }}
               whileHover={shouldReduceMotion ? {} : { y: -6 }}
-              className="group relative p-5 sm:p-8 rounded-2xl sm:rounded-3xl bg-[#0e121b]/70 hover:bg-[#121726]/90 border border-white/[0.09] hover:border-sky-400/40 transition-all duration-300 ease-out shadow-[0_8px_30px_rgba(0,0,0,0.4)] hover:shadow-[0_20px_55px_rgba(56,189,248,0.12)] overflow-hidden"
+              className="group relative p-5 sm:p-8 rounded-2xl sm:rounded-3xl bg-[#0e121b]/80 md:bg-[#0e121b]/70 hover:bg-[#121726]/90 border border-white/[0.09] hover:border-sky-400/40 transition-all duration-300 ease-out shadow-[0_8px_30px_rgba(0,0,0,0.4)] hover:shadow-[0_20px_55px_rgba(56,189,248,0.12)] overflow-hidden hardware-accelerated"
             >
               {/* Dynamic ambient gradient illumination on hover */}
               <div 

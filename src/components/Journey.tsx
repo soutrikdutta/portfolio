@@ -17,8 +17,9 @@ export const Journey: React.FC = () => {
         <motion.div
           initial={shouldReduceMotion ? false : { opacity: 0, x: -30 }}
           whileInView={{ opacity: 1, x: 0 }}
-          viewport={{ once: false, margin: "-60px" }}
-          transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+          viewport={{ once: false, margin: "-15px" }}
+          transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+          className="hardware-accelerated"
         >
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/[0.04] border border-white/[0.08] text-[11px] font-mono text-zinc-400 mb-2 shadow-sm">
             <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
@@ -41,11 +42,11 @@ export const Journey: React.FC = () => {
             return (
               <motion.div
                 key={index}
-                initial={shouldReduceMotion ? false : { opacity: 0, y: 30, x: -15 }}
+                initial={shouldReduceMotion ? false : { opacity: 0, y: 25, x: -10 }}
                 whileInView={{ opacity: 1, y: 0, x: 0 }}
-                viewport={{ once: false, margin: "-40px" }}
-                transition={{ duration: 0.55, delay: index * 0.1, ease: [0.16, 1, 0.3, 1] }}
-                className="flex items-stretch gap-4 sm:gap-6 group"
+                viewport={{ once: false, margin: "-15px" }}
+                transition={{ duration: 0.45, delay: index * 0.08, ease: [0.16, 1, 0.3, 1] }}
+                className="flex items-stretch gap-4 sm:gap-6 group hardware-accelerated"
               >
                 {/* Dedicated Track Column: Dot and Line */}
                 <div className="relative flex flex-col items-center flex-shrink-0 w-6 pt-2">

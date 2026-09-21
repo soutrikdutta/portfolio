@@ -140,9 +140,9 @@ Email: ${formData.email.trim()}`;
         <motion.div
           initial={shouldReduceMotion ? false : { opacity: 0, x: -30 }}
           whileInView={{ opacity: 1, x: 0 }}
-          viewport={{ once: false, margin: "-60px" }}
+          viewport={{ once: false, margin: "-15px" }}
           transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-          className="space-y-2"
+          className="space-y-2 hardware-accelerated"
         >
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight text-white">
             {portfolioConfig.contact.heading}
@@ -194,9 +194,9 @@ Email: ${formData.email.trim()}`;
         <motion.div
           initial={shouldReduceMotion ? false : { opacity: 0, y: 12 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: false, margin: "-40px" }}
+          viewport={{ once: false, margin: "-15px" }}
           transition={{ duration: 0.5 }}
-          className="p-6 sm:p-8 rounded-2xl bg-[#0e121b]/65 backdrop-blur-xl border border-white/[0.09] shadow-[0_8px_32px_rgba(0,0,0,0.35)] max-w-xl"
+          className="p-6 sm:p-8 rounded-2xl bg-[#0e121b]/65 backdrop-blur-xl border border-white/[0.09] shadow-[0_8px_32px_rgba(0,0,0,0.35)] max-w-xl hardware-accelerated"
         >
           {status === "success" ? (
             <div className="py-6 text-center space-y-4">

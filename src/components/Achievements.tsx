@@ -75,26 +75,28 @@ export const Achievements: React.FC = () => {
                 key={item.title}
                 initial={{ opacity: 0, y: shouldReduceMotion ? 0 : 16 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: false, margin: "-40px" }}
+                viewport={{ once: false, margin: "-15px" }}
                 transition={{
-                  duration: 0.45,
-                  delay: shouldReduceMotion ? 0 : index * 0.08,
-                  ease: "easeOut",
+                  duration: 0.4,
+                  delay: shouldReduceMotion ? 0 : (index % 2) * 0.06,
+                  ease: [0.16, 1, 0.3, 1],
                 }}
                 whileHover={shouldReduceMotion ? {} : { y: -2 }}
-                className="w-full md:w-[calc(50%-0.75rem)] group relative flex flex-col justify-between p-5 sm:p-6 rounded-2xl bg-[#0e121b]/60 hover:bg-[#111522]/80 backdrop-blur-sm border border-white/[0.08] hover:border-white/[0.22] shadow-[0_8px_30px_rgba(0,0,0,0.35)] hover:shadow-[0_12px_36px_rgba(0,0,0,0.5)] transition-all duration-300 overflow-hidden"
+                className="w-full md:w-[calc(50%-0.75rem)] group relative flex flex-col justify-between p-5 sm:p-6 rounded-2xl bg-[#0e121b]/80 sm:bg-[#0e121b]/60 hover:bg-[#111522]/90 border border-white/[0.08] hover:border-white/[0.22] shadow-[0_8px_30px_rgba(0,0,0,0.35)] hover:shadow-[0_12px_36px_rgba(0,0,0,0.5)] transition-all duration-300 overflow-hidden hardware-accelerated"
               >
                 <div className="space-y-4">
                   {/* Dedicated Image Frame Space (supports single image or multi-image carousel) */}
                   <div className="relative w-full h-60 sm:h-72 rounded-xl overflow-hidden bg-[#07090e] border border-white/[0.08] group-hover:border-white/[0.20] transition-colors select-none flex items-center justify-center">
                     {hasValidImage ? (
                       <>
-                        {/* Ambient blurred backdrop to eliminate harsh empty bars */}
+                        {/* Ambient blurred backdrop on desktop (hidden on mobile to eliminate GPU blur thrash) */}
                         <img
                           src={currentImg}
                           alt=""
                           aria-hidden="true"
-                          className="absolute inset-0 w-full h-full object-cover blur-2xl opacity-40 scale-125 pointer-events-none"
+                          loading="lazy"
+                          decoding="async"
+                          className="hidden sm:block absolute inset-0 w-full h-full object-cover blur-xl opacity-35 scale-110 pointer-events-none hardware-accelerated"
                         />
 
                         {/* Foreground clear image: fully visible with zero cropping */}
@@ -102,7 +104,9 @@ export const Achievements: React.FC = () => {
                           key={currentImg}
                           src={currentImg}
                           alt={`${item.title} - ${currentIndex + 1}`}
-                          className="relative z-10 max-w-full max-h-full object-contain object-center transition-all duration-300 group-hover:scale-[1.02]"
+                          loading="lazy"
+                          decoding="async"
+                          className="relative z-10 max-w-full max-h-full object-contain object-center transition-all duration-300 group-hover:scale-[1.02] hardware-accelerated"
                           onError={() => handleImageError(`${item.title}-${currentIndex}`)}
                         />
 

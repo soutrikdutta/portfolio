@@ -39,17 +39,17 @@ export const Certifications: React.FC = () => {
       <motion.div
         initial={{ opacity: 0, y: shouldReduceMotion ? 0 : 20 }}
         whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: false, margin: "-80px" }}
+        viewport={{ once: false, margin: "-15px" }}
         transition={{ duration: 0.5 }}
-        className="space-y-6"
+        className="space-y-6 hardware-accelerated"
       >
         {/* Section Header */}
         <motion.div
           initial={shouldReduceMotion ? false : { opacity: 0, x: -30 }}
           whileInView={{ opacity: 1, x: 0 }}
-          viewport={{ once: false, margin: "-60px" }}
+          viewport={{ once: false, margin: "-15px" }}
           transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-          className="space-y-2"
+          className="space-y-2 hardware-accelerated"
         >
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight text-white">
             Certifications
@@ -83,30 +83,40 @@ export const Certifications: React.FC = () => {
                 <img
                   src="/certifications/google-cloud-badge.png"
                   alt="Build a Secure Google Cloud Network"
+                  loading="lazy"
+                  decoding="async"
                   className="w-7 h-7 rounded-md bg-white p-0.5 object-contain border border-white/20 shadow-sm"
                   title="Build a Secure Google Cloud Network"
                 />
                 <img
                   src="/certifications/google-cloud-load-balancing.png"
                   alt="Implement Load Balancing on Compute Engine"
+                  loading="lazy"
+                  decoding="async"
                   className="w-7 h-7 rounded-md bg-white p-0.5 object-contain border border-white/20 shadow-sm"
                   title="Implement Load Balancing on Compute Engine"
                 />
                 <img
                   src="/certifications/google-cloud-ml-apis.png"
                   alt="Prepare Data for ML APIs on Google Cloud"
+                  loading="lazy"
+                  decoding="async"
                   className="w-7 h-7 rounded-md bg-white p-0.5 object-contain border border-white/20 shadow-sm"
                   title="Prepare Data for ML APIs on Google Cloud"
                 />
                 <img
                   src="/certifications/google-cloud-app-dev.png"
                   alt="Set Up an App Dev Environment on Google Cloud"
+                  loading="lazy"
+                  decoding="async"
                   className="w-7 h-7 rounded-md bg-white p-0.5 object-contain border border-white/20 shadow-sm"
                   title="Set Up an App Dev Environment on Google Cloud"
                 />
                 <img
                   src="/certifications/gemini-certified-student-badge.png"
                   alt="Gemini Certified Student (University)"
+                  loading="lazy"
+                  decoding="async"
                   className="w-7 h-7 rounded-md bg-white p-0.5 object-contain border border-white/20 shadow-sm"
                   title="Gemini Certified Student (University)"
                 />
