@@ -1,0 +1,6 @@
+# Robots.txt for Soutrik Dutta Portfolio (https://soutrik.antideploy.com)
+User-agent: *
+Allow: /
+
+# Sitemap location
+Sitemap: https://soutrik.antideploy.com/sitemap.xml
