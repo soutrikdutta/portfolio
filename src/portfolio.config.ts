@@ -133,7 +133,7 @@ export const portfolioConfig = {
       date: "2026",
       description: "Developed SHARODSHAV, a smart Durga Puja planning platform that helps users discover pandals, plan their visits, explore nearby places, and navigate the festivities more efficiently. Built during HackRIT, a 24-hour hackathon under DEVx 2.0 at Techno India University.",
       highlight: "DEVX 2.0 x GDG on campus TIU",
-      link: "#",
+      link: "https://technotimes.info/index.php/2026/09/17/devx-2-0-techno-india-university",
       linkLabel: "Read Article",
       imageUrl: "/achievements/sharodshav-hackrit.jpg",
       images: [
