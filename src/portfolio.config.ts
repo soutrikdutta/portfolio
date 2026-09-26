@@ -233,8 +233,8 @@ export const portfolioConfig = {
       emailLink: "mailto:2006soutrik@gmail.com"
     },
     // Optional Web3Forms or Formspree access key from env or fallback
-    formEndpoint: import.meta.env.VITE_CONTACT_FORM_ENDPOINT || "https://api.web3forms.com/submit",
-    web3FormsKey: import.meta.env.VITE_WEB3FORMS_KEY || ""
+    formEndpoint: "https://api.web3forms.com/submit",
+    web3FormsKey: ""
   },
 
   footer: {
