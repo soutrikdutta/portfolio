@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion, useScroll, useTransform, useReducedMotion, type Variants } from "framer-motion";
 import { portfolioConfig } from "../portfolio.config";
 import { ArrowRight, ArrowUpRight, ArrowDown, Github, Linkedin, Phone, Mail, Sparkles } from "lucide-react";
@@ -14,6 +14,50 @@ export const Hero: React.FC = () => {
 
   // Interactive mouse parallax state (active only on desktop)
   const [mousePos, setMousePos] = useState({ x: 0, y: 0, rotateX: 0, rotateY: 0 });
+
+  // Typewriter + One-by-One Delete Animation State
+  const fullName = portfolioConfig.personal.name;
+  const [displayText, setDisplayText] = useState("");
+  const [animState, setAnimState] = useState<"typing" | "hold" | "deleting">("typing");
+
+  useEffect(() => {
+    if (shouldReduceMotion) {
+      setDisplayText(fullName);
+      setAnimState("hold");
+      return;
+    }
+
+    let timeoutId: ReturnType<typeof setTimeout>;
+
+    if (animState === "typing") {
+      if (displayText.length < fullName.length) {
+        // Natural human keyboard typing speed (80ms - 130ms)
+        const delay = 80 + Math.random() * 50;
+        timeoutId = setTimeout(() => {
+          setDisplayText(fullName.slice(0, displayText.length + 1));
+        }, delay);
+      } else {
+        // Fully typed! Hold for a generous 6.5s so viewers have total ease of reading
+        timeoutId = setTimeout(() => {
+          setAnimState("deleting");
+        }, 6500);
+      }
+    } else if (animState === "deleting") {
+      if (displayText.length > 0) {
+        // DELETE ONE BY ONE visibly and clearly (110ms per letter)
+        timeoutId = setTimeout(() => {
+          setDisplayText((prev) => prev.slice(0, -1));
+        }, 110);
+      } else {
+        // When completely deleted, pause for 650ms at empty before appearing again
+        timeoutId = setTimeout(() => {
+          setAnimState("typing");
+        }, 650);
+      }
+    }
+
+    return () => clearTimeout(timeoutId);
+  }, [animState, displayText, fullName, shouldReduceMotion]);
 
   const handleMouseMove = (e: React.MouseEvent<HTMLElement>) => {
     if (shouldReduceMotion || typeof window === "undefined" || window.innerWidth < 768) return;
@@ -73,8 +117,6 @@ export const Hero: React.FC = () => {
     },
   };
 
-  const nameLetters = portfolioConfig.personal.name.split("");
-
   return (
     <section
       id="hero"
@@ -109,6 +151,37 @@ export const Hero: React.FC = () => {
         className="sm:hidden absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[280px] h-[240px] bg-sky-500/15 blur-[50px] rounded-full pointer-events-none -z-10 hardware-accelerated" 
         aria-hidden="true" 
       />
+
+      {/* Floating Ambient Micro-Sparkles */}
+      {!shouldReduceMotion && (
+        <div className="absolute inset-0 pointer-events-none overflow-hidden -z-10" aria-hidden="true">
+          {[
+            { top: "18%", left: "12%", delay: 0, dur: 6.5 },
+            { top: "28%", left: "82%", delay: 1.2, dur: 7.2 },
+            { top: "62%", left: "8%", delay: 2.1, dur: 8.0 },
+            { top: "72%", left: "88%", delay: 0.8, dur: 6.8 },
+            { top: "45%", left: "92%", delay: 2.7, dur: 7.5 },
+          ].map((pt, i) => (
+            <motion.div
+              key={i}
+              animate={{
+                y: [0, -28, 0],
+                x: [0, (i % 2 === 0 ? 12 : -12), 0],
+                opacity: [0.2, 0.65, 0.2],
+                scale: [1, 1.4, 1],
+              }}
+              transition={{
+                duration: pt.dur,
+                repeat: Infinity,
+                ease: "easeInOut",
+                delay: pt.delay,
+              }}
+              style={{ top: pt.top, left: pt.left }}
+              className="absolute w-1.5 h-1.5 rounded-full bg-sky-400 blur-[0.6px] shadow-[0_0_8px_rgba(56,189,248,0.9)]"
+            />
+          ))}
+        </div>
+      )}
 
       <motion.div
         variants={containerVariants}
@@ -171,10 +244,13 @@ export const Hero: React.FC = () => {
         {/* 3. Text & Actions Column */}
         <div className="order-2 md:order-1 flex-1 flex flex-col items-center md:items-start text-center md:text-left space-y-4 sm:space-y-5 md:space-y-6 max-w-2xl w-full">
           
-          {/* Availability Badge */}
+          {/* Availability Badge with Pulsing Radar Ring */}
           <motion.div variants={itemVariants}>
             <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.09] hover:border-emerald-500/30 backdrop-blur-md shadow-sm transition-all duration-300">
-              <span className="w-2 h-2 rounded-full bg-emerald-400" />
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.9)]" />
+              </span>
               <span className="text-[11px] sm:text-xs font-medium text-zinc-200 tracking-wide">
                 Available for opportunities &amp; collaborations
               </span>
@@ -189,26 +265,39 @@ export const Hero: React.FC = () => {
             </p>
           </motion.div>
 
-          {/* Main Heading: LETTER-BY-LETTER Animated Reveal */}
+          {/* Main Heading: Keyboard Typewriter -> Long Pause -> Backspace -> Pop-out Spring */}
           <motion.div variants={itemVariants} className="w-full">
             <h1 className="text-3xl xs:text-4xl sm:text-5xl md:text-6xl lg:text-[72px] tracking-tight leading-[1.08] text-white">
               <span className="text-zinc-400 font-light block sm:inline">Hi, I&apos;m </span>
-              <span className="inline-block">
-                {nameLetters.map((letter, i) => (
+              <span className="inline-block relative min-h-[1.14em] align-baseline">
+                {/* Invisible layout anchor to reserve exact width & height and prevent any layout jitter */}
+                <span className="invisible opacity-0 select-none pointer-events-none" aria-hidden="true">
+                  {fullName}
+                </span>
+
+                {/* Visible animated text */}
+                <span className="absolute inset-0 flex items-baseline whitespace-nowrap">
+                  <span className="font-bold tracking-tight bg-gradient-to-r from-white via-zinc-100 to-zinc-300 bg-clip-text text-transparent drop-shadow-[0_2px_16px_rgba(255,255,255,0.25)]">
+                    {displayText.split("").map((char, index) => (
+                      <motion.span
+                        key={`char-${index}-${char}`}
+                        initial={{ opacity: 0, scale: 0.6, y: 6 }}
+                        animate={{ opacity: 1, scale: [0.6, 1.15, 1], y: 0 }}
+                        transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
+                        className="inline-block"
+                      >
+                        {char === " " ? "\u00A0" : char}
+                      </motion.span>
+                    ))}
+                  </span>
+
+                  {/* Pulsing keyboard cursor */}
                   <motion.span
-                    key={i}
-                    initial={shouldReduceMotion ? false : { opacity: 0, y: 25 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{
-                      duration: 0.5,
-                      delay: shouldReduceMotion ? 0 : 0.15 + i * 0.03,
-                      ease: [0.16, 1, 0.3, 1],
-                    }}
-                    className="inline-block text-white font-bold tracking-tight bg-gradient-to-r from-white via-zinc-100 to-zinc-300 bg-clip-text text-transparent drop-shadow-[0_2px_16px_rgba(255,255,255,0.2)] hover:text-sky-300 transition-colors duration-200"
-                  >
-                    {letter === " " ? "\u00A0" : letter}
-                  </motion.span>
-                ))}
+                    animate={{ opacity: [1, 0, 1] }}
+                    transition={{ duration: 0.75, repeat: Infinity, ease: "easeInOut" }}
+                    className="inline-block w-[3px] sm:w-[4px] h-[0.78em] bg-sky-400 ml-1.5 align-middle rounded-full shadow-[0_0_10px_rgba(56,189,248,0.9)]"
+                  />
+                </span>
               </span>
             </h1>
           </motion.div>
