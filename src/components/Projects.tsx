@@ -129,18 +129,27 @@ export const Projects: React.FC = () => {
                   )}
 
                   {project.liveUrl && (
-                    <motion.a
-                      href={project.liveUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      whileHover={shouldReduceMotion ? {} : { scale: 1.05, y: -2 }}
-                      whileTap={{ scale: 0.95 }}
-                      className="inline-flex items-center gap-1.5 text-xs text-white font-medium px-4 py-2 rounded-full border border-sky-400/40 hover:border-sky-400 bg-gradient-to-r from-sky-500/20 to-blue-600/20 hover:from-sky-500/30 hover:to-blue-600/30 backdrop-blur-md transition-all duration-200 shadow-[0_4px_20px_rgba(56,189,248,0.2)]"
-                      aria-label={`${project.title} Live Demo`}
-                    >
-                      <span>Live Demo</span>
-                      <ArrowUpRight className="w-3.5 h-3.5 text-sky-300 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-white" />
-                    </motion.a>
+                    project.liveUrl === "#" ? (
+                      <span
+                        className="inline-flex items-center gap-1.5 text-xs text-zinc-400 font-medium px-4 py-2 rounded-full border border-white/[0.10] bg-white/[0.03] backdrop-blur-md cursor-default select-none shadow-sm"
+                        aria-label={`${project.title} Live Demo`}
+                      >
+                        <span>Live Demo</span>
+                      </span>
+                    ) : (
+                      <motion.a
+                        href={project.liveUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        whileHover={shouldReduceMotion ? {} : { scale: 1.05, y: -2 }}
+                        whileTap={{ scale: 0.95 }}
+                        className="inline-flex items-center gap-1.5 text-xs text-white font-medium px-4 py-2 rounded-full border border-sky-400/40 hover:border-sky-400 bg-gradient-to-r from-sky-500/20 to-blue-600/20 hover:from-sky-500/30 hover:to-blue-600/30 backdrop-blur-md transition-all duration-200 shadow-[0_4px_20px_rgba(56,189,248,0.2)]"
+                        aria-label={`${project.title} Live Demo`}
+                      >
+                        <span>Live Demo</span>
+                        <ArrowUpRight className="w-3.5 h-3.5 text-sky-300 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-white" />
+                      </motion.a>
+                    )
                   )}
                 </div>
               </div>

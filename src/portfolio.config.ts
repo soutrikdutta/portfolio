@@ -100,7 +100,7 @@ export const portfolioConfig = {
       tagline: "High-performance web platform connecting students with paid industry projects and real-world internship opportunities.",
       technologies: ["React", "Firebase", "Cloud Firestore", "Tailwind CSS", "Vite"],
       githubUrl: "https://github.com/soutrikdutta/skillgrad",
-      liveUrl: "https://skillgrad.vercel.app",
+      liveUrl: "#",
       featured: true
     },
     {
@@ -109,7 +109,7 @@ export const portfolioConfig = {
       tagline: "A smart Durga Puja planning platform that helps users discover pandals, plan visits, explore nearby places, and navigate the festivities more efficiently.",
       technologies: ["React", "TypeScript", "Tailwind CSS", "Geolocation", "Vite"],
       githubUrl: "https://github.com/soutrikdutta/sharodshava-pujo-planner",
-      liveUrl: "https://sharodshav-two.vercel.app",
+      liveUrl: "#",
       featured: true
     }
   ] as ProjectItem[],
