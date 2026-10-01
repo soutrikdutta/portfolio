@@ -66,7 +66,8 @@ export const PORTFOLIO_DATA = {
       github: 'https://github.com/soutrikdutta',
       linkedin: 'https://www.linkedin.com/in/soutrik-dutta-245b93372/',
       email: 'mailto:2006soutrik@gmail.com',
-      phone: 'tel:+918902281688'
+      phone: 'tel:+918902281688',
+      whatsapp: 'https://wa.me/918902281688'
     }
   },
 
