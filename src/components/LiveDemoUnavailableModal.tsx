@@ -79,9 +79,19 @@ export const LiveDemoUnavailableModal: React.FC<LiveDemoUnavailableModalProps> =
   }, [isOpen]);
 
   const handleContactClick = () => {
+    const target = projectTitle ? projectTitle : 'your project';
+    const prefillMsg = `Hi Soutrik, I would like to explore the live demo for ${target}. Please share the demo link with me.`;
+
+    // 1. Dispatch custom event to React state in ContactSection immediately
+    window.dispatchEvent(
+      new CustomEvent('prefill-contact-message', {
+        detail: { message: prefillMsg }
+      })
+    );
+
     handleClose();
 
-    // Scroll to contact section
+    // 2. Smoothly scroll to contact section
     setTimeout(() => {
       if (onNavigateToContact) {
         onNavigateToContact();
@@ -92,21 +102,31 @@ export const LiveDemoUnavailableModal: React.FC<LiveDemoUnavailableModalProps> =
         }
       }
 
-      // Pre-fill or focus the message box if available
+      // 3. Dispatch event again to ensure state synchronization and focus
       setTimeout(() => {
-        const messageInput = document.querySelector<HTMLTextAreaElement>('#contact textarea');
-        if (messageInput) {
-          if (!messageInput.value && projectTitle) {
-            messageInput.value = `Hi Soutrik, I would like to explore the live demo for ${projectTitle}. Please share the demo link with me.`;
-            messageInput.dispatchEvent(new Event('input', { bubbles: true }));
-          }
-          messageInput.focus();
+        window.dispatchEvent(
+          new CustomEvent('prefill-contact-message', {
+            detail: { message: prefillMsg }
+          })
+        );
+
+        const nameInput = document.getElementById('contact-name') as HTMLInputElement | null;
+        if (nameInput && !nameInput.value) {
+          nameInput.focus();
         } else {
-          const nameInput = document.querySelector<HTMLInputElement>('#contact input');
-          if (nameInput) nameInput.focus();
+          const contactInfoInput = document.getElementById('contact-info') as HTMLInputElement | null;
+          if (contactInfoInput && !contactInfoInput.value) {
+            contactInfoInput.focus();
+          } else {
+            const messageInput = document.getElementById('contact-message') as HTMLTextAreaElement | null;
+            if (messageInput) {
+              messageInput.focus();
+              messageInput.setSelectionRange(messageInput.value.length, messageInput.value.length);
+            }
+          }
         }
-      }, 400);
-    }, 120);
+      }, 300);
+    }, 100);
   };
 
   return (

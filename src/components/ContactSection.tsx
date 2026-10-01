@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { Linkedin, Github, Phone, Mail, Send, CheckCircle2, AlertCircle } from 'lucide-react';
 import { FluxCard } from './FluxCard';
@@ -14,6 +14,24 @@ export const ContactSection: React.FC = () => {
   const [errors, setErrors] = useState<{ name?: string; contactInfo?: string; message?: string }>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
+
+  // Listen for prefill requests (e.g. from Live Demo notice modal)
+  useEffect(() => {
+    const handlePrefill = (e: Event) => {
+      const customEvent = e as CustomEvent<{ message?: string; name?: string }>;
+      if (customEvent.detail?.message) {
+        setMessage(customEvent.detail.message);
+        setErrors(prev => ({ ...prev, message: undefined }));
+      }
+      if (customEvent.detail?.name) {
+        setName(customEvent.detail.name);
+        setErrors(prev => ({ ...prev, name: undefined }));
+      }
+    };
+
+    window.addEventListener('prefill-contact-message', handlePrefill);
+    return () => window.removeEventListener('prefill-contact-message', handlePrefill);
+  }, []);
 
   const validateEmail = (email: string) => {
     return /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(email.trim());
@@ -251,6 +269,7 @@ export const ContactSection: React.FC = () => {
                       Name <span className="text-[#00ff66]">*</span>
                     </label>
                     <input
+                      id="contact-name"
                       type="text"
                       required
                       value={name}
@@ -274,6 +293,7 @@ export const ContactSection: React.FC = () => {
                       Contact Info (Email or Phone) <span className="text-[#00ff66]">*</span>
                     </label>
                     <input
+                      id="contact-info"
                       type="text"
                       required
                       value={contactInfo}
@@ -298,6 +318,7 @@ export const ContactSection: React.FC = () => {
                     Message <span className="text-[#00ff66]">*</span>
                   </label>
                   <textarea
+                    id="contact-message"
                     required
                     rows={4}
                     value={message}
@@ -316,11 +337,7 @@ export const ContactSection: React.FC = () => {
                   )}
                 </div>
 
-                <div className="pt-2 flex items-center justify-between flex-wrap gap-4 font-space">
-                  <span className="text-[11px] text-zinc-300">
-                    DIRECT RECIPIENT: <span className="text-[#00ff66] font-semibold">{profile.email}</span>
-                  </span>
-
+                <div className="pt-2 flex items-center justify-end font-space">
                   <button
                     type="submit"
                     disabled={isSubmitting}
