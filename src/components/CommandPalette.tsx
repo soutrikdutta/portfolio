@@ -20,7 +20,6 @@ import {
 } from 'lucide-react';
 import { PORTFOLIO_DATA } from '../data/portfolioData';
 import { openLiveDemoNotice } from './LiveDemoUnavailableModal';
-import { WhatsAppIcon } from './WhatsAppIcon';
 
 interface CommandPaletteProps {
   isOpen: boolean;
@@ -182,17 +181,6 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
       subtitle: profile.phone,
       icon: Phone,
       action: () => handleCopy(profile.phone, 'Phone number')
-    },
-    {
-      id: 'act-whatsapp',
-      category: 'ACTIONS',
-      title: 'Chat on WhatsApp',
-      subtitle: '+91 89022 81688',
-      icon: WhatsAppIcon,
-      action: () => {
-        window.open('https://wa.me/918902281688', '_blank');
-        onClose();
-      }
     },
     {
       id: 'act-github',

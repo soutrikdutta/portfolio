@@ -4,7 +4,6 @@ import { Linkedin, Github, Phone, Mail, Send, CheckCircle2, AlertCircle } from '
 import { FluxCard } from './FluxCard';
 import { GlyphDecryptText } from './GlyphDecryptText';
 import { PORTFOLIO_DATA } from '../data/portfolioData';
-import { WhatsAppIcon } from './WhatsAppIcon';
 
 export const ContactSection: React.FC = () => {
   const { profile } = PORTFOLIO_DATA;
@@ -15,7 +14,6 @@ export const ContactSection: React.FC = () => {
   const [errors, setErrors] = useState<{ name?: string; contactInfo?: string; message?: string }>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
-  const [submittedWhatsAppUrl, setSubmittedWhatsAppUrl] = useState('');
 
   // Listen for prefill requests (e.g. from Live Demo notice modal)
   useEffect(() => {
@@ -114,24 +112,10 @@ export const ContactSection: React.FC = () => {
       docId: '1Z6UBnAo7RpL5pCn9z12jKHnFl57M_tftip5NdupWHH4'
     };
 
-    // 1. Prepare WhatsApp formatted message URL
-    const cleanPhone = profile.phone.replace(/[^0-9]/g, '');
-    const rawWhatsAppText = `Hello Soutrik!\n\n*Name:* ${name.trim()}\n*Contact:* ${contactInfo.trim()}\n\n*Message:*\n${message.trim()}`;
-    const whatsappUrl = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(rawWhatsAppText)}`;
-
-    setSubmittedWhatsAppUrl(whatsappUrl);
-
-    // 2. Directly take this message to WhatsApp (opens in new tab)
-    try {
-      window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
-    } catch (e) {
-      console.warn('WhatsApp direct open notice:', e);
-    }
-
-    // 3. Instantly show confirmed transmission state in UI (zero wait time)
+    // 1. Instantly show confirmed transmission state in UI (zero wait time)
     setSubmitSuccess(true);
 
-    // 4. Perform background synchronization to Google Docs asynchronously (single request, fire-and-forget)
+    // 2. Perform background synchronization to Google Docs asynchronously (single request, fire-and-forget)
     const webhookUrl =
       import.meta.env.VITE_GOOGLE_DOC_WEBHOOK_URL ||
       'https://script.google.com/macros/s/AKfycbzEbZfXfImapVExTWL5l_dk3v80Bz7gxfq2r0ksCbFdv9e-m1P4zZQQ59Z4zXE46X758g/exec';
@@ -206,18 +190,6 @@ export const ContactSection: React.FC = () => {
             <span className="pointer-events-none absolute inset-0 w-1/2 h-full bg-gradient-to-r from-transparent via-white/10 to-transparent animate-shimmer-sweep" />
             <Github className="w-3.5 h-3.5 relative z-10 text-white/80 group-hover:text-[#00ff66] transition-colors" />
             <span className="relative z-10 font-medium">GitHub</span>
-          </a>
-
-          <a
-            href={`https://wa.me/${profile.phone.replace(/[^0-9]/g, '')}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="relative overflow-hidden inline-flex items-center gap-2 px-4 py-2 rounded-full bg-zinc-900/90 hover:bg-zinc-800 border border-white/15 hover:border-[#25D366]/60 text-xs font-space text-zinc-200 hover:text-white transition-all duration-300 shadow-sm hover:shadow-[0_0_15px_rgba(37,211,102,0.3)] hover:scale-105 active:scale-95 group cursor-pointer tracking-wide"
-            title="Chat with Soutrik on WhatsApp (+91 89022 81688)"
-          >
-            <span className="pointer-events-none absolute inset-0 w-1/2 h-full bg-gradient-to-r from-transparent via-[#25D366]/15 to-transparent animate-shimmer-sweep" />
-            <WhatsAppIcon className="w-3.5 h-3.5 relative z-10 text-white/80 group-hover:text-[#25D366] transition-colors" />
-            <span className="relative z-10 font-medium">WhatsApp</span>
           </a>
 
           <a
@@ -320,7 +292,7 @@ export const ContactSection: React.FC = () => {
                     className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#00b848]/15 border border-[#00b848]/30 text-[#00ff66] text-xs font-mono mb-4 tracking-wider"
                   >
                     <span className="w-1.5 h-1.5 rounded-full bg-[#00ff66] animate-pulse" />
-                    TRANSMISSION CONFIRMED • WHATSAPP READY
+                    TRANSMISSION CONFIRMED
                   </motion.div>
 
                   <motion.h3
@@ -338,7 +310,7 @@ export const ContactSection: React.FC = () => {
                     transition={{ delay: 0.32, duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
                     className="text-base sm:text-lg text-zinc-100 font-space max-w-xl mx-auto mb-8 leading-relaxed font-medium"
                   >
-                    Thanks for reaching out! Your message was recorded and taken directly to WhatsApp so we can chat in real time.
+                    Thanks for reaching out. Your message means a lot to me. I’ll get back to you as soon as possible.
                   </motion.p>
 
                   <motion.div
@@ -347,17 +319,6 @@ export const ContactSection: React.FC = () => {
                     transition={{ delay: 0.40, duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
                     className="flex flex-wrap items-center justify-center gap-3"
                   >
-                    <a
-                      href={submittedWhatsAppUrl || `https://wa.me/${profile.phone.replace(/[^0-9]/g, '')}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="relative overflow-hidden inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-[#25D366] hover:bg-[#20ba5a] text-xs font-bold text-black transition-all duration-300 shadow-[0_0_20px_rgba(37,211,102,0.4)] hover:shadow-[0_0_30px_rgba(37,211,102,0.6)] hover:scale-105 active:scale-95 font-space tracking-wide cursor-pointer"
-                    >
-                      <span className="pointer-events-none absolute inset-0 w-1/2 h-full bg-gradient-to-r from-transparent via-white/30 to-transparent animate-shimmer-sweep" />
-                      <WhatsAppIcon className="w-4 h-4 fill-black relative z-10" />
-                      <span className="relative z-10">Open WhatsApp Chat</span>
-                    </a>
-
                     <button
                       onClick={() => {
                         setSubmitSuccess(false);
@@ -365,17 +326,15 @@ export const ContactSection: React.FC = () => {
                         setContactInfo('');
                         setMessage('');
                         setErrors({});
-                        setSubmittedWhatsAppUrl('');
                       }}
-                      className="relative overflow-hidden px-5 py-2.5 rounded-full bg-zinc-900 hover:bg-zinc-800 text-xs font-semibold text-zinc-200 hover:text-white border border-white/15 hover:border-white/30 transition-all duration-300 cursor-pointer shadow-md hover:scale-105 active:scale-95 font-space tracking-wide"
+                      className="relative overflow-hidden px-6 py-2.5 rounded-full bg-[#00b848] hover:bg-[#00c853] text-xs font-semibold text-black transition-all duration-300 cursor-pointer shadow-md hover:scale-105 active:scale-95 font-space tracking-wide"
                     >
-                      <span className="pointer-events-none absolute inset-0 w-1/2 h-full bg-gradient-to-r from-transparent via-white/15 to-transparent animate-shimmer-sweep" />
+                      <span className="pointer-events-none absolute inset-0 w-1/2 h-full bg-gradient-to-r from-transparent via-white/25 to-transparent animate-shimmer-sweep" />
                       <span className="relative z-10">Send Another Message</span>
                     </button>
-
                     <a
                       href={`mailto:${profile.email}?subject=${encodeURIComponent(`Portfolio Note from ${name}`)}&body=${encodeURIComponent(message)}`}
-                      className="relative overflow-hidden px-5 py-2.5 rounded-full bg-zinc-900/60 hover:bg-zinc-800 text-xs text-zinc-300 hover:text-white border border-white/10 hover:border-white/20 transition-all duration-300 hover:scale-105 active:scale-95 font-space tracking-wide"
+                      className="relative overflow-hidden px-5 py-2.5 rounded-full bg-zinc-900 hover:bg-zinc-800 text-xs text-zinc-200 hover:text-white border border-white/15 hover:border-white/30 transition-all duration-300 hover:scale-105 active:scale-95 font-space tracking-wide"
                     >
                       <span className="relative z-10">Send Email Copy (Optional)</span>
                     </a>

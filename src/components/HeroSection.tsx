@@ -4,7 +4,6 @@ import { ArrowDown, Mail, Phone, Github, Linkedin, ExternalLink } from 'lucide-r
 import { HeroPhotoCard } from './HeroPhotoCard';
 import { GlyphDecryptText } from './GlyphDecryptText';
 import { PORTFOLIO_DATA } from '../data/portfolioData';
-import { WhatsAppIcon } from './WhatsAppIcon';
 
 interface HeroSectionProps {
   onScrollToProjects: () => void;
@@ -133,19 +132,6 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
               <Github className="w-3.5 h-3.5 relative z-10 text-white/80 group-hover:text-[#00ff66] transition-colors" />
               <span className="relative z-10 font-medium">GitHub</span>
               <ExternalLink className="w-3 h-3 relative z-10 text-white/50 group-hover:text-white/80 opacity-60" />
-            </a>
-
-            {/* WhatsApp Pill */}
-            <a
-              href={`https://wa.me/${profile.phone.replace(/[^0-9]/g, '')}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="relative overflow-hidden inline-flex items-center gap-2 px-4 py-2 rounded-full bg-zinc-900/90 hover:bg-zinc-800 text-white border border-white/15 hover:border-[#25D366]/60 text-xs transition-all duration-300 group shadow-sm hover:shadow-[0_0_15px_rgba(37,211,102,0.3)] hover:scale-105 active:scale-95 font-space"
-              title="Chat with Soutrik on WhatsApp (+91 89022 81688)"
-            >
-              <span className="pointer-events-none absolute inset-0 w-1/2 h-full bg-gradient-to-r from-transparent via-[#25D366]/15 to-transparent animate-shimmer-sweep" />
-              <WhatsAppIcon className="w-3.5 h-3.5 relative z-10 text-white/80 group-hover:text-[#25D366] transition-colors" />
-              <span className="relative z-10 font-medium">WhatsApp</span>
             </a>
 
             {/* Call Pill - Directly opens dialer/calling app */}
