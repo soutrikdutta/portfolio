@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, ChevronLeft, ChevronRight, ExternalLink, ShieldCheck } from 'lucide-react';
+import { openLiveDemoNotice } from './LiveDemoUnavailableModal';
 
 export interface FullscreenLightboxProps {
   isOpen: boolean;
@@ -209,15 +210,17 @@ export const FullscreenLightbox: React.FC<FullscreenLightboxProps> = ({
           )}
 
           {liveUrl && (
-            <a
-              href={liveUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-mono text-white bg-zinc-800 hover:bg-zinc-700 border border-white/20 transition-all font-medium"
+            <button
+              type="button"
+              onClick={() => {
+                onClose();
+                openLiveDemoNotice(title);
+              }}
+              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-mono text-white bg-zinc-800 hover:bg-zinc-700 border border-white/20 transition-all font-medium cursor-pointer"
             >
               <span>Open Live Demo</span>
               <ExternalLink className="w-3 h-3" />
-            </a>
+            </button>
           )}
         </div>
       </div>

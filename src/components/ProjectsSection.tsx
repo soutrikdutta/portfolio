@@ -6,6 +6,7 @@ import { GlyphDecryptText } from './GlyphDecryptText';
 import { ProjectMockupVisual } from './ProjectMockupVisual';
 import { ProjectImageGallery } from './ProjectImageGallery';
 import { FullscreenLightbox } from './FullscreenLightbox';
+import { openLiveDemoNotice } from './LiveDemoUnavailableModal';
 import { PORTFOLIO_DATA, Project } from '../data/portfolioData';
 
 export const ProjectsSection: React.FC = () => {
@@ -149,16 +150,15 @@ export const ProjectsSection: React.FC = () => {
                     </a>
 
                     {/* Live Demo Button */}
-                    <a
-                      href={project.liveUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex-1 sm:flex-initial justify-center relative overflow-hidden px-3.5 sm:px-4 py-2 rounded-full bg-[#00b848]/20 hover:bg-[#00b848]/35 text-[#00ff66] hover:text-white border border-[#00b848]/40 hover:border-[#00b848]/80 text-xs flex items-center gap-1.5 sm:gap-2 transition-all duration-300 font-semibold shadow-[0_0_15px_rgba(0,184,72,0.15)] hover:shadow-[0_0_25px_rgba(0,184,72,0.4)] hover:scale-105 active:scale-95 group/live font-space whitespace-nowrap"
+                    <button
+                      type="button"
+                      onClick={() => openLiveDemoNotice(project.title)}
+                      className="flex-1 sm:flex-initial justify-center relative overflow-hidden px-3.5 sm:px-4 py-2 rounded-full bg-[#00b848]/20 hover:bg-[#00b848]/35 text-[#00ff66] hover:text-white border border-[#00b848]/40 hover:border-[#00b848]/80 text-xs flex items-center gap-1.5 sm:gap-2 transition-all duration-300 font-semibold shadow-[0_0_15px_rgba(0,184,72,0.15)] hover:shadow-[0_0_25px_rgba(0,184,72,0.4)] hover:scale-105 active:scale-95 group/live font-space whitespace-nowrap cursor-pointer"
                     >
                       <span className="pointer-events-none absolute inset-0 w-1/2 h-full bg-gradient-to-r from-transparent via-[#00ff66]/20 to-transparent animate-shimmer-sweep" />
                       <ExternalLink className="w-3.5 h-3.5 relative z-10 group-hover/live:translate-x-0.5 group-hover/live:-translate-y-0.5 transition-transform" />
                       <span className="relative z-10">Live Demo</span>
-                    </a>
+                    </button>
                   </div>
 
                   <span className="text-[10px] text-zinc-400 font-mono font-bold shrink-0 ml-2">
@@ -251,16 +251,19 @@ export const ProjectsSection: React.FC = () => {
                     <span>View Repository</span>
                   </a>
 
-                  <a
-                    href={selectedProject.liveUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="relative overflow-hidden px-5 py-2.5 rounded-full bg-[#00b848]/20 hover:bg-[#00b848]/35 text-[#00ff66] hover:text-white border border-[#00b848]/40 hover:border-[#00b848]/80 text-xs flex items-center gap-2 transition-all duration-300 font-semibold shadow-[0_0_20px_rgba(0,184,72,0.25)] hover:scale-105 active:scale-95 font-dot tracking-wide"
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const title = selectedProject.title;
+                      setSelectedProject(null);
+                      openLiveDemoNotice(title);
+                    }}
+                    className="relative overflow-hidden px-5 py-2.5 rounded-full bg-[#00b848]/20 hover:bg-[#00b848]/35 text-[#00ff66] hover:text-white border border-[#00b848]/40 hover:border-[#00b848]/80 text-xs flex items-center gap-2 transition-all duration-300 font-semibold shadow-[0_0_20px_rgba(0,184,72,0.25)] hover:scale-105 active:scale-95 font-dot tracking-wide cursor-pointer"
                   >
                     <span className="pointer-events-none absolute inset-0 w-1/2 h-full bg-gradient-to-r from-transparent via-[#00ff66]/20 to-transparent animate-shimmer-sweep" />
                     <ExternalLink className="w-4 h-4 relative z-10" />
                     <span className="relative z-10">Open Live Demo</span>
-                  </a>
+                  </button>
                 </div>
 
                 <button

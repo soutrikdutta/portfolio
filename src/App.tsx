@@ -15,6 +15,7 @@ import { CustomCursor } from './components/CustomCursor';
 import { ScrollProgressBar } from './components/ScrollProgressBar';
 import { SectionDivider } from './components/SectionDivider';
 import { CommandPalette } from './components/CommandPalette';
+import { LiveDemoUnavailableModal } from './components/LiveDemoUnavailableModal';
 
 export default function App() {
   const [currentView, setCurrentView] = useState<'home' | 'certifications'>('home');
@@ -128,6 +129,9 @@ export default function App() {
         onNavigateSection={handleNavigateFromCommand}
         onOpenCertifications={openCertificationsView}
       />
+
+      {/* High-Traffic Live Demo Notice Modal */}
+      <LiveDemoUnavailableModal onNavigateToContact={() => scrollToSection('contact')} />
 
       {/* Main View Router */}
       <main className="flex-1">

@@ -19,6 +19,7 @@ import {
   Zap
 } from 'lucide-react';
 import { PORTFOLIO_DATA } from '../data/portfolioData';
+import { openLiveDemoNotice } from './LiveDemoUnavailableModal';
 
 interface CommandPaletteProps {
   isOpen: boolean;
@@ -148,8 +149,8 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
       subtitle: 'Paid industry projects & student internship platform',
       icon: ExternalLink,
       action: () => {
-        window.open(projects[0]?.liveUrl || 'https://skillgrad.vercel.app', '_blank');
         onClose();
+        openLiveDemoNotice('SkillGrad');
       }
     },
     {
@@ -159,8 +160,8 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
       subtitle: 'AI & crowd route optimization platform for Durga Puja',
       icon: ExternalLink,
       action: () => {
-        window.open(projects[1]?.liveUrl || 'https://sharodshav-two.vercel.app', '_blank');
         onClose();
+        openLiveDemoNotice('SHARODSHAV');
       }
     },
 
