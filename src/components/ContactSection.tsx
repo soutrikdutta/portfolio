@@ -78,6 +78,9 @@ export const ContactSection: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    // Prevent double submission
+    if (isSubmitting || submitSuccess) return;
+
     const newErrors: { name?: string; contactInfo?: string; message?: string } = {};
 
     if (!name.trim() || name.trim().length < 2) {
@@ -98,6 +101,7 @@ export const ContactSection: React.FC = () => {
       return;
     }
 
+    setIsSubmitting(true);
     setErrors({});
 
     const payload = {
@@ -110,28 +114,19 @@ export const ContactSection: React.FC = () => {
 
     // 1. Instantly show confirmed transmission state in UI (zero wait time)
     setSubmitSuccess(true);
-    setIsSubmitting(false);
 
-    // 2. Perform background synchronization to Google Docs & API asynchronously (fire-and-forget)
+    // 2. Perform background synchronization to Google Docs asynchronously (single request, fire-and-forget)
     const webhookUrl =
       import.meta.env.VITE_GOOGLE_DOC_WEBHOOK_URL ||
       'https://script.google.com/macros/s/AKfycbzEbZfXfImapVExTWL5l_dk3v80Bz7gxfq2r0ksCbFdv9e-m1P4zZQQ59Z4zXE46X758g/exec';
 
-    Promise.allSettled([
-      fetch(webhookUrl, {
-        method: 'POST',
-        mode: 'no-cors',
-        keepalive: true,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      }),
-      fetch('/api/contact', {
-        method: 'POST',
-        keepalive: true,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      })
-    ]).catch((err) => {
+    fetch(webhookUrl, {
+      method: 'POST',
+      mode: 'no-cors',
+      keepalive: true,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    }).catch((err) => {
       console.warn('Background contact sync notice:', err);
     });
   };
