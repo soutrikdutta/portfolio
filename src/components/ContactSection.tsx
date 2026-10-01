@@ -99,7 +99,6 @@ export const ContactSection: React.FC = () => {
     }
 
     setErrors({});
-    setIsSubmitting(true);
 
     const payload = {
       name: name.trim(),
@@ -109,29 +108,32 @@ export const ContactSection: React.FC = () => {
       docId: '1Z6UBnAo7RpL5pCn9z12jKHnFl57M_tftip5NdupWHH4'
     };
 
-    try {
-      const webhookUrl =
-        import.meta.env.VITE_GOOGLE_DOC_WEBHOOK_URL ||
-        'https://script.google.com/macros/s/AKfycbzEbZfXfImapVExTWL5l_dk3v80Bz7gxfq2r0ksCbFdv9e-m1P4zZQQ59Z4zXE46X758g/exec';
+    // 1. Instantly show confirmed transmission state in UI (zero wait time)
+    setSubmitSuccess(true);
+    setIsSubmitting(false);
 
-      await fetch(webhookUrl, {
+    // 2. Perform background synchronization to Google Docs & API asynchronously (fire-and-forget)
+    const webhookUrl =
+      import.meta.env.VITE_GOOGLE_DOC_WEBHOOK_URL ||
+      'https://script.google.com/macros/s/AKfycbzEbZfXfImapVExTWL5l_dk3v80Bz7gxfq2r0ksCbFdv9e-m1P4zZQQ59Z4zXE46X758g/exec';
+
+    Promise.allSettled([
+      fetch(webhookUrl, {
         method: 'POST',
         mode: 'no-cors',
+        keepalive: true,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
-      });
-
-      await fetch('/api/contact', {
+      }),
+      fetch('/api/contact', {
         method: 'POST',
+        keepalive: true,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
-      }).catch(() => {});
-    } catch (err) {
-      console.warn('Google Doc sync notice:', err);
-    }
-
-    setIsSubmitting(false);
-    setSubmitSuccess(true);
+      })
+    ]).catch((err) => {
+      console.warn('Background contact sync notice:', err);
+    });
   };
 
   return (
