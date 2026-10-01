@@ -1,115 +1,186 @@
-import React, { useState, useEffect } from "react";
-import { motion, useScroll } from "framer-motion";
-import { Navbar } from "./components/Navbar";
-import { Hero } from "./components/Hero";
-import { About } from "./components/About";
-import { Journey } from "./components/Journey";
-import { Projects } from "./components/Projects";
-import { Skills } from "./components/Skills";
-import { Achievements } from "./components/Achievements";
-import { Certifications } from "./components/Certifications";
-import { Contact } from "./components/Contact";
-import { Footer } from "./components/Footer";
-import { DynamicBackground } from "./components/DynamicBackground";
-import { ArrowUp } from "lucide-react";
+import React, { useState, useEffect } from 'react';
+import { TopBar } from './components/TopBar';
+import { HeroSection } from './components/HeroSection';
+import { AboutSection } from './components/AboutSection';
+import { JourneySection } from './components/JourneySection';
+import { ProjectsSection } from './components/ProjectsSection';
+import { SkillsSection } from './components/SkillsSection';
+import { AchievementsSection } from './components/AchievementsSection';
+import { CertificationsSection } from './components/CertificationsSection';
+import { CertificationsPage } from './components/CertificationsPage';
+import { ContactSection } from './components/ContactSection';
+import { Footer } from './components/Footer';
+import { InteractiveDotBackground } from './components/InteractiveDotBackground';
+import { CustomCursor } from './components/CustomCursor';
+import { ScrollProgressBar } from './components/ScrollProgressBar';
+import { SectionDivider } from './components/SectionDivider';
+import { CommandPalette } from './components/CommandPalette';
 
-export const App: React.FC = () => {
-  const [activeSection, setActiveSection] = useState("hero");
-  const [showBackToTop, setShowBackToTop] = useState(false);
+export default function App() {
+  const [currentView, setCurrentView] = useState<'home' | 'certifications'>('home');
+  const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
 
-  // Animated top scroll progress indicator
-  const { scrollYProgress } = useScroll();
-
-  useEffect(() => {
-    // Reset scroll position to the very top on initial load and page refresh
-    if (typeof window !== "undefined") {
-      if ("scrollRestoration" in window.history) {
-        window.history.scrollRestoration = "manual";
-      }
-      window.scrollTo(0, 0);
+  const scrollToSection = (sectionId: string) => {
+    if (currentView !== 'home') {
+      setCurrentView('home');
+      setTimeout(() => {
+        const el = document.getElementById(sectionId);
+        if (el) el.scrollIntoView({ behavior: 'smooth' });
+      }, 100);
+    } else {
+      const el = document.getElementById(sectionId);
+      if (el) el.scrollIntoView({ behavior: 'smooth' });
     }
+  };
 
-    const sectionIds = ["hero", "about", "journey", "projects", "skills", "achievements", "certifications", "contact"];
+  const openCertificationsView = () => {
+    try {
+      window.history.pushState({ view: 'certifications' }, '', '#all-certifications');
+    } catch (_) {}
+    setCurrentView('certifications');
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  };
 
-    const handleScroll = () => {
-      const scrollPosition = window.scrollY + 220;
-
-      for (let i = sectionIds.length - 1; i >= 0; i--) {
-        const id = sectionIds[i];
-        const element = document.getElementById(id);
-        if (element) {
-          const top = element.offsetTop;
-          if (scrollPosition >= top) {
-            setActiveSection(id);
-            break;
-          }
-        }
+  const backToPortfolioFromCertifications = () => {
+    document.body.style.overflow = '';
+    setCurrentView('home');
+    try {
+      if (window.location.hash === '#all-certifications') {
+        window.history.replaceState({ view: 'home' }, '', '#certifications');
       }
+    } catch (_) {}
 
-      setShowBackToTop(window.scrollY > 400);
+    // Scroll back to the Certifications section on the home page with auto behavior
+    setTimeout(() => {
+      document.body.style.overflow = '';
+      const el = document.getElementById('certifications');
+      if (el) {
+        el.scrollIntoView({ behavior: 'auto', block: 'start' });
+      }
+    }, 40);
+  };
+
+  // Support browser native back button to return to certifications section
+  useEffect(() => {
+    const handlePopState = (e: PopStateEvent) => {
+      if (currentView === 'certifications' && (!e.state || e.state.view !== 'certifications')) {
+        document.body.style.overflow = '';
+        setCurrentView('home');
+        setTimeout(() => {
+          document.body.style.overflow = '';
+          const el = document.getElementById('certifications');
+          if (el) {
+            el.scrollIntoView({ behavior: 'auto', block: 'start' });
+          }
+        }, 40);
+      }
     };
 
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    handleScroll(); // Initial check on mount
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, [currentView]);
 
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-    };
-  }, []);
-
-  const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
+  const handleNavigateFromCommand = (target: string) => {
+    if (target.startsWith('#')) {
+      const id = target.substring(1);
+      scrollToSection(id);
+    }
   };
 
   return (
-    <div className="relative min-h-screen text-[#f4f4f6] selection:bg-white/10 selection:text-white font-sans antialiased overflow-x-hidden">
-      {/* 1. Animated Top Scroll Progress Glow Bar */}
-      <motion.div
-        style={{ scaleX: scrollYProgress }}
-        className="fixed top-0 inset-x-0 h-[2.5px] bg-gradient-to-r from-sky-400 via-blue-500 to-indigo-500 origin-left z-[70] shadow-[0_0_12px_rgba(56,189,248,0.85)] pointer-events-none"
-      />
-
-      {/* 2. Live Dynamic Background Canvas */}
-      <DynamicBackground />
-
-      <div className="relative z-10">
-        {/* Floating Frosted Navigation */}
-        <Navbar activeSection={activeSection} />
-
-        {/* Main Content Sections */}
-        <main id="main-content">
-          <Hero />
-          <About />
-          <Journey />
-          <Projects />
-          <Skills />
-          <Achievements />
-          <Certifications />
-          <Contact />
-        </main>
-
-        {/* Minimal Footer */}
-        <Footer />
+    <div className="min-h-screen bg-[#040504] text-zinc-100 flex flex-col font-space selection:bg-[#00b848]/30 selection:text-white relative">
+      {/* Ambient Color Depth Atmosphere - Floating Living Luminous Auroras */}
+      <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden transform-gpu will-change-transform opacity-90">
+        <div className="absolute top-[5%] left-[8%] w-[550px] h-[550px] rounded-full bg-emerald-500/[0.12] blur-[140px] animate-float-subtle" />
+        <div className="absolute top-[32%] right-[5%] w-[500px] h-[500px] rounded-full bg-cyan-500/[0.09] blur-[130px] animate-float-delayed" />
+        <div className="absolute top-[58%] left-[5%] w-[520px] h-[520px] rounded-full bg-purple-600/[0.07] blur-[150px] animate-float-subtle" />
+        <div className="absolute top-[82%] right-[10%] w-[560px] h-[560px] rounded-full bg-emerald-500/[0.11] blur-[140px] animate-float-delayed" />
       </div>
 
-      {/* Floating Back to Top Button */}
-      {showBackToTop && (
-        <motion.button
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0, scale: 0.8 }}
-          whileHover={{ y: -3, scale: 1.08 }}
-          whileTap={{ scale: 0.92 }}
-          type="button"
-          onClick={scrollToTop}
-          className="fixed bottom-6 right-6 z-40 p-3 rounded-full bg-[#0d1017]/85 backdrop-blur-xl border border-white/[0.14] hover:border-sky-400/40 text-zinc-300 hover:text-white shadow-[0_8px_30px_rgba(0,0,0,0.6)] hover:shadow-[0_0_20px_rgba(56,189,248,0.3)] transition-all duration-200"
-          aria-label="Scroll back to top"
-        >
-          <ArrowUp className="w-4 h-4" />
-        </motion.button>
-      )}
+      {/* Interactive Cursor-Reactive Light Dot Background */}
+      <InteractiveDotBackground />
+
+      {/* Cyber Reticle Custom Cursor */}
+      <CustomCursor />
+
+      {/* Real-time Scroll Depth Indicator */}
+      <ScrollProgressBar />
+
+      {/* Nothing OS Top Bar Navigation */}
+      <TopBar
+        currentView={currentView}
+        onNavigate={(view) => {
+          if (view === 'home' && currentView === 'certifications') {
+            backToPortfolioFromCertifications();
+          } else if (view === 'certifications') {
+            openCertificationsView();
+          } else {
+            setCurrentView(view);
+          }
+        }}
+        onOpenCommandPalette={() => setIsCommandPaletteOpen(true)}
+      />
+
+      {/* Keyboard-Triggered & Clickable Command Palette HUD */}
+      <CommandPalette
+        isOpen={isCommandPaletteOpen}
+        onClose={() => setIsCommandPaletteOpen(false)}
+        onNavigateSection={handleNavigateFromCommand}
+        onOpenCertifications={openCertificationsView}
+      />
+
+      {/* Main View Router */}
+      <main className="flex-1">
+        {currentView === 'home' ? (
+          <>
+            {/* Hero Section with Jumbled Pixel Decrypt Animation & Channels */}
+            <HeroSection
+              onScrollToProjects={() => scrollToSection('projects')}
+              onScrollToContact={() => scrollToSection('contact')}
+              onScrollToCertifications={() => scrollToSection('certifications')}
+            />
+
+            <SectionDivider />
+
+            {/* About Me Section with Requested Bio & Spec Box */}
+            <AboutSection />
+
+            <SectionDivider />
+
+            {/* My Journey Section with Active TIU CSE Radar State */}
+            <JourneySection />
+
+            <SectionDivider />
+
+            {/* Projects Section with 2 Builds, Images & Editable Demo Copy */}
+            <ProjectsSection />
+
+            <SectionDivider />
+
+            {/* Technical Skills Section in Liquid Flux Box with Logos */}
+            <SkillsSection />
+
+            <SectionDivider />
+
+            {/* Achievements Section with Balanced 3-Item Layout & Visuals */}
+            <AchievementsSection />
+
+            <SectionDivider />
+
+            {/* Certifications Preview Section with "View All" Button */}
+            <CertificationsSection onViewAllCertifications={openCertificationsView} />
+
+            {/* "Let's Build Something" Section with Direct Channels & Message Box */}
+            <ContactSection />
+          </>
+        ) : (
+          /* Dedicated Certifications Page View */
+          <CertificationsPage onBack={backToPortfolioFromCertifications} />
+        )}
+      </main>
+
+      {/* Nothing OS Minimalist Footer */}
+      <Footer />
     </div>
   );
-};
-
-export default App;
+}
