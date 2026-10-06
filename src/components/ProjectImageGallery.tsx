@@ -31,11 +31,19 @@ export const ProjectImageGallery: React.FC<ProjectImageGalleryProps> = ({
 
   const total = images.length;
 
+  const lastNavTime = useRef(0);
+
   const nextSlide = () => {
+    const now = Date.now();
+    if (now - lastNavTime.current < 250) return;
+    lastNavTime.current = now;
     setCurrentIndex((prev) => (prev + 1) % total);
   };
 
   const prevSlide = () => {
+    const now = Date.now();
+    if (now - lastNavTime.current < 250) return;
+    lastNavTime.current = now;
     setCurrentIndex((prev) => (prev - 1 + total) % total);
   };
 
@@ -121,11 +129,6 @@ export const ProjectImageGallery: React.FC<ProjectImageGalleryProps> = ({
                 onOpenLightbox(currentIndex);
               }}
               onTouchStart={(e) => e.stopPropagation()}
-              onTouchEnd={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                onOpenLightbox(currentIndex);
-              }}
               className="p-1 sm:p-1.5 rounded-full text-zinc-300 hover:text-white hover:bg-white/10 transition-all hover:scale-110 active:scale-90 cursor-pointer shrink-0"
               title="Expand Fullscreen"
               aria-label="Expand image"
@@ -178,11 +181,6 @@ export const ProjectImageGallery: React.FC<ProjectImageGalleryProps> = ({
                 prevSlide();
               }}
               onTouchStart={(e) => e.stopPropagation()}
-              onTouchEnd={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                prevSlide();
-              }}
               className="absolute left-2 top-1/2 -translate-y-1/2 z-30 w-8 h-8 sm:w-7 sm:h-7 rounded-full bg-black/80 hover:bg-black/95 text-white flex items-center justify-center border border-white/20 backdrop-blur-md opacity-90 sm:opacity-0 sm:group-hover:opacity-100 transition-all duration-200 active:scale-90 cursor-pointer shadow-lg"
               aria-label="Previous screenshot"
             >
@@ -195,11 +193,6 @@ export const ProjectImageGallery: React.FC<ProjectImageGalleryProps> = ({
                 nextSlide();
               }}
               onTouchStart={(e) => e.stopPropagation()}
-              onTouchEnd={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                nextSlide();
-              }}
               className="absolute right-2 top-1/2 -translate-y-1/2 z-30 w-8 h-8 sm:w-7 sm:h-7 rounded-full bg-black/80 hover:bg-black/95 text-white flex items-center justify-center border border-white/20 backdrop-blur-md opacity-90 sm:opacity-0 sm:group-hover:opacity-100 transition-all duration-200 active:scale-90 cursor-pointer shadow-lg"
               aria-label="Next screenshot"
             >
