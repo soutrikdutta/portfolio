@@ -45,7 +45,6 @@ export const CertificationsPage: React.FC<CertificationsPageProps> = ({ onBack }
             onClick={onBack}
             className="relative overflow-hidden inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-zinc-900/90 hover:bg-zinc-800 border border-white/15 hover:border-[#00b848]/60 text-xs font-space text-zinc-200 hover:text-white transition-all duration-300 group cursor-pointer shadow-sm hover:shadow-[0_0_15px_rgba(0,184,72,0.3)] hover:scale-105 active:scale-95 tracking-wide"
           >
-            <span className="pointer-events-none absolute inset-0 w-1/2 h-full bg-gradient-to-r from-transparent via-white/10 to-transparent animate-shimmer-sweep" />
             <ArrowLeft className="w-4 h-4 text-[#00ff66] relative z-10 group-hover:-translate-x-1 transition-transform" />
             <span className="relative z-10 font-medium">Return to Portfolio</span>
           </button>
@@ -265,7 +264,7 @@ export const CertificationsPage: React.FC<CertificationsPageProps> = ({ onBack }
         <FullscreenLightbox
           isOpen={!!fullscreenCert}
           onClose={() => setFullscreenCert(null)}
-          images={[fullscreenCert.certificateUrl || fullscreenCert.imageUrl]}
+          images={[fullscreenCert.certificateUrl || fullscreenCert.imageUrl || '']}
           title={fullscreenCert.title}
           subtitle={`${fullscreenCert.issuer} · Credential ID: ${fullscreenCert.credentialId}`}
           verifyUrl={fullscreenCert.verifyUrl}

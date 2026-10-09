@@ -4,9 +4,12 @@ import { Linkedin, Github, Phone, Mail, Send, CheckCircle2, AlertCircle } from '
 import { FluxCard } from './FluxCard';
 import { GlyphDecryptText } from './GlyphDecryptText';
 import { PORTFOLIO_DATA } from '../data/portfolioData';
+import { useScrollDirection } from '../hooks/useScrollAnimation';
 
 export const ContactSection: React.FC = () => {
   const { profile } = PORTFOLIO_DATA;
+  const direction = useScrollDirection();
+  const offset = direction === 'down' ? 26 : -26;
 
   const [name, setName] = useState('');
   const [contactInfo, setContactInfo] = useState('');
@@ -136,9 +139,9 @@ export const ContactSection: React.FC = () => {
       <div className="max-w-4xl mx-auto">
         {/* Section Header */}
         <motion.div
-          initial={{ opacity: 0, y: 28 }}
+          initial={{ opacity: 0, y: offset }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: false, amount: 0.15 }}
+          viewport={{ once: false, amount: 0.1 }}
           transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
           className="text-center mb-12"
         >
@@ -162,7 +165,7 @@ export const ContactSection: React.FC = () => {
 
         {/* Small Channel Buttons: LinkedIn, GitHub, Call, Email */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: offset * 0.7 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: false, amount: 0.08 }}
           transition={{ duration: 0.5, delay: 0.06, ease: [0.22, 1, 0.36, 1] }}
@@ -175,7 +178,6 @@ export const ContactSection: React.FC = () => {
             className="relative overflow-hidden inline-flex items-center gap-2 px-4 py-2 rounded-full bg-zinc-900/90 hover:bg-zinc-800 border border-white/15 hover:border-[#00b848]/60 text-xs font-space text-zinc-200 hover:text-white transition-all duration-300 shadow-sm hover:shadow-[0_0_15px_rgba(0,184,72,0.3)] hover:scale-105 active:scale-95 group tracking-wide"
             title="Open LinkedIn Profile"
           >
-            <span className="pointer-events-none absolute inset-0 w-1/2 h-full bg-gradient-to-r from-transparent via-white/10 to-transparent animate-shimmer-sweep" />
             <Linkedin className="w-3.5 h-3.5 relative z-10 text-white/80 group-hover:text-[#00ff66] transition-colors" />
             <span className="relative z-10 font-medium">LinkedIn</span>
           </a>
@@ -187,7 +189,6 @@ export const ContactSection: React.FC = () => {
             className="relative overflow-hidden inline-flex items-center gap-2 px-4 py-2 rounded-full bg-zinc-900/90 hover:bg-zinc-800 border border-white/15 hover:border-[#00b848]/60 text-xs font-space text-zinc-200 hover:text-white transition-all duration-300 shadow-sm hover:shadow-[0_0_15px_rgba(0,184,72,0.3)] hover:scale-105 active:scale-95 group tracking-wide"
             title="Open GitHub Profile"
           >
-            <span className="pointer-events-none absolute inset-0 w-1/2 h-full bg-gradient-to-r from-transparent via-white/10 to-transparent animate-shimmer-sweep" />
             <Github className="w-3.5 h-3.5 relative z-10 text-white/80 group-hover:text-[#00ff66] transition-colors" />
             <span className="relative z-10 font-medium">GitHub</span>
           </a>
@@ -197,7 +198,6 @@ export const ContactSection: React.FC = () => {
             className="relative overflow-hidden inline-flex items-center gap-2 px-4 py-2 rounded-full bg-zinc-900/90 hover:bg-zinc-800 border border-white/15 hover:border-[#00b848]/60 text-xs font-space text-zinc-200 hover:text-white transition-all duration-300 shadow-sm hover:shadow-[0_0_15px_rgba(0,184,72,0.3)] hover:scale-105 active:scale-95 group cursor-pointer tracking-wide"
             title="Call Soutrik (+91 89022 81688)"
           >
-            <span className="pointer-events-none absolute inset-0 w-1/2 h-full bg-gradient-to-r from-transparent via-[#00ff66]/15 to-transparent animate-shimmer-sweep" />
             <Phone className="w-3.5 h-3.5 relative z-10 text-white/80 group-hover:text-[#00ff66] transition-colors" />
             <span className="relative z-10 font-medium">Call</span>
           </a>
@@ -207,7 +207,6 @@ export const ContactSection: React.FC = () => {
             className="relative overflow-hidden inline-flex items-center gap-2 px-4 py-2 rounded-full bg-zinc-900/90 hover:bg-zinc-800 border border-white/15 hover:border-[#00b848]/60 text-xs font-space text-zinc-200 hover:text-white transition-all duration-300 shadow-sm hover:shadow-[0_0_15px_rgba(0,184,72,0.3)] hover:scale-105 active:scale-95 group cursor-pointer tracking-wide"
             title="Send Email via Gmail / Mail App"
           >
-            <span className="pointer-events-none absolute inset-0 w-1/2 h-full bg-gradient-to-r from-transparent via-[#00ff66]/15 to-transparent animate-shimmer-sweep" />
             <Mail className="w-3.5 h-3.5 relative z-10 text-white/80 group-hover:text-[#00ff66] transition-colors" />
             <span className="relative z-10 font-medium">Email</span>
           </button>
@@ -215,7 +214,7 @@ export const ContactSection: React.FC = () => {
 
         {/* Message Box */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: offset }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: false, amount: 0.08 }}
           transition={{ duration: 0.5, delay: 0.08, ease: [0.22, 1, 0.36, 1] }}
@@ -329,7 +328,6 @@ export const ContactSection: React.FC = () => {
                       }}
                       className="relative overflow-hidden px-6 py-2.5 rounded-full bg-[#00b848] hover:bg-[#00c853] text-xs font-semibold text-black transition-all duration-300 cursor-pointer shadow-md hover:scale-105 active:scale-95 font-space tracking-wide"
                     >
-                      <span className="pointer-events-none absolute inset-0 w-1/2 h-full bg-gradient-to-r from-transparent via-white/25 to-transparent animate-shimmer-sweep" />
                       <span className="relative z-10">Send Another Message</span>
                     </button>
                     <a
@@ -431,7 +429,6 @@ export const ContactSection: React.FC = () => {
                       disabled={isSubmitting}
                       className="relative overflow-hidden px-8 py-3.5 bg-[#00b848] hover:bg-[#00c853] disabled:opacity-50 text-black font-bold text-xs rounded-full transition-all duration-300 flex items-center gap-2.5 cursor-pointer shadow-[0_4px_20px_rgba(0,184,72,0.35)] hover:shadow-[0_4px_30px_rgba(0,184,72,0.6)] hover:scale-105 active:scale-95 font-space tracking-wide group"
                     >
-                      <span className="pointer-events-none absolute inset-0 w-1/2 h-full bg-gradient-to-r from-transparent via-white/30 to-transparent animate-shimmer-sweep" />
                       {isSubmitting ? (
                         <span className="relative z-10">Sending...</span>
                       ) : (
@@ -451,4 +448,3 @@ export const ContactSection: React.FC = () => {
     </section>
   );
 };
-

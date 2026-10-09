@@ -24,7 +24,12 @@ export const Footer: React.FC = () => {
   }, []);
 
   const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    const lenis = (window as unknown as { __lenis?: { scrollTo: (target: number, opts: { duration: number }) => void } }).__lenis;
+    if (lenis) {
+      lenis.scrollTo(0, { duration: 1.2 });
+    } else {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
   };
 
   return (
@@ -53,7 +58,6 @@ export const Footer: React.FC = () => {
           className="relative overflow-hidden px-4 py-2 rounded-full bg-zinc-900/90 hover:bg-zinc-800 text-white border border-white/15 hover:border-[#00b848]/60 text-xs font-space transition-all duration-300 flex items-center gap-2 cursor-pointer shadow-sm hover:shadow-[0_0_15px_rgba(0,184,72,0.3)] hover:scale-105 active:scale-95 group tracking-wide"
           aria-label="Scroll to top"
         >
-          <span className="pointer-events-none absolute inset-0 w-1/2 h-full bg-gradient-to-r from-transparent via-[#00ff66]/15 to-transparent animate-shimmer-sweep" />
           <span className="relative z-10 font-medium">Top</span>
           <ArrowUp className="w-3.5 h-3.5 relative z-10 text-[#00ff66] group-hover:-translate-y-0.5 transition-transform" />
         </button>
