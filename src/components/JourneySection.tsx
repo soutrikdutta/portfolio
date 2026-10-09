@@ -1,10 +1,23 @@
-import React from 'react';
-import { motion } from 'motion/react';
+import React, { useRef } from 'react';
+import { motion, useScroll, useSpring } from 'motion/react';
 import { GlyphDecryptText } from './GlyphDecryptText';
 import { PORTFOLIO_DATA } from '../data/portfolioData';
 
 export const JourneySection: React.FC = () => {
   const { journey } = PORTFOLIO_DATA;
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // Silky scroll-linked progress for the vertical timeline laser
+  const { scrollYProgress } = useScroll({
+    target: containerRef,
+    offset: ['start 65%', 'end 75%'],
+  });
+
+  const lineHeight = useSpring(scrollYProgress, {
+    stiffness: 280,
+    damping: 32,
+    restDelta: 0.001,
+  });
 
   return (
     <section id="journey" className="py-20 px-6 relative">
@@ -33,13 +46,18 @@ export const JourneySection: React.FC = () => {
           </div>
         </motion.div>
 
-        {/* Continuous, Aligned Living Timeline */}
-        <div className="relative">
-          {/* Continuous vertical timeline track line with glowing energy pulse */}
-          <div className="absolute left-4 sm:left-6 top-8 bottom-8 w-[2px] bg-zinc-800 pointer-events-none -translate-x-1/2 overflow-hidden rounded-full">
+        {/* Continuous, Aligned Living Timeline with Scroll-Linked Energy Beam */}
+        <div ref={containerRef} className="relative">
+          {/* Continuous vertical timeline track line */}
+          <div className="absolute left-4 sm:left-6 top-8 bottom-8 w-[2px] bg-zinc-900 pointer-events-none -translate-x-1/2 overflow-hidden rounded-full">
             {/* Ambient track glow base */}
-            <div className="absolute inset-0 bg-gradient-to-b from-white/20 via-[#00b848]/30 to-transparent" />
-            {/* Light, subtle energy pulse traversing the track */}
+            <div className="absolute inset-0 bg-white/[0.08]" />
+            {/* Dynamic scroll-driven glowing energy line growing down */}
+            <motion.div
+              style={{ scaleY: lineHeight, originY: 0 }}
+              className="absolute inset-x-0 top-0 h-full bg-gradient-to-b from-[#00ff66] via-[#00b848] to-[#06b6d4] shadow-[0_0_12px_rgba(0,255,102,0.8)] transform-gpu will-change-transform"
+            />
+            {/* Ambient traveling pulse traversing the track */}
             <motion.div
               animate={{ y: ['-100%', '350%'] }}
               transition={{ duration: 4.5, repeat: Infinity, ease: 'easeInOut' }}
@@ -54,20 +72,26 @@ export const JourneySection: React.FC = () => {
               return (
                 <motion.div
                   key={item.year}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: false, amount: 0.08 }}
-                  transition={{ duration: 0.5, delay: idx * 0.06, ease: [0.22, 1, 0.36, 1] }}
+                  initial={{ opacity: 0, x: -24, scale: 0.95 }}
+                  whileInView={{ opacity: 1, x: 0, scale: 1 }}
+                  viewport={{ once: false, amount: 0.15 }}
+                  transition={{ duration: 0.6, delay: idx * 0.08, ease: [0.16, 1, 0.3, 1] }}
                   className="relative flex items-start group transform-gpu will-change-transform"
                 >
                   {/* Timeline Concentric Ring Bullet Node - Clean, light and subtle */}
-                  <div className="absolute left-4 sm:left-6 top-7 sm:top-8 -translate-x-1/2 -translate-y-1/2 z-10 flex items-center justify-center pointer-events-none">
+                  <motion.div
+                    initial={{ scale: 0.7, opacity: 0 }}
+                    whileInView={{ scale: 1, opacity: 1 }}
+                    viewport={{ once: false, amount: 0.2 }}
+                    transition={{ duration: 0.45, delay: idx * 0.08 + 0.1, ease: [0.22, 1, 0.36, 1] }}
+                    className="absolute left-4 sm:left-6 top-7 sm:top-8 -translate-x-1/2 -translate-y-1/2 z-10 flex items-center justify-center pointer-events-none"
+                  >
                     {isActive ? (
                       <div className="relative flex items-center justify-center">
-                        {/* Soft, delicate breathing halo - very light, no harsh ping */}
-                        <span className="absolute w-5.5 h-5.5 rounded-full bg-[#00ff66]/10 animate-pulse duration-1000" />
+                        {/* Soft, delicate breathing halo */}
+                        <span className="absolute w-6 h-6 rounded-full bg-[#00ff66]/15 animate-pulse duration-1000" />
                         {/* Outer Green Ring */}
-                        <div className="w-[18px] h-[18px] rounded-full border-[1.5px] border-[#00ff66]/80 bg-zinc-950 flex items-center justify-center shadow-[0_0_8px_rgba(0,255,102,0.25)]">
+                        <div className="w-[18px] h-[18px] rounded-full border-[1.5px] border-[#00ff66] bg-zinc-950 flex items-center justify-center shadow-[0_0_10px_rgba(0,255,102,0.4)]">
                           {/* Inner Green Dot */}
                           <span className="w-1.5 h-1.5 rounded-full bg-[#00ff66]" />
                         </div>
@@ -75,28 +99,25 @@ export const JourneySection: React.FC = () => {
                     ) : (
                       <div className="relative flex items-center justify-center">
                         {/* Outer White/Zinc Ring */}
-                        <div className="w-[18px] h-[18px] rounded-full border border-white/40 bg-zinc-950 flex items-center justify-center shadow-[0_0_5px_rgba(255,255,255,0.15)]">
+                        <div className="w-[18px] h-[18px] rounded-full border border-white/40 bg-zinc-950 flex items-center justify-center shadow-[0_0_5px_rgba(255,255,255,0.15)] group-hover:border-[#00ff66]/60 transition-colors">
                           {/* Inner White Dot */}
-                          <span className="w-1.5 h-1.5 rounded-full bg-white/80" />
+                          <span className="w-1.5 h-1.5 rounded-full bg-white/80 group-hover:bg-[#00ff66] transition-colors" />
                         </div>
                       </div>
                     )}
-                  </div>
+                  </motion.div>
 
-                  {/* Milestone Card - clean, sleek, minimal Nothing OS aesthetic matching screenshot */}
+                  {/* Milestone Card */}
                   <div className="flex-1 ml-10 sm:ml-14">
                     <motion.div
-                      whileHover={{ x: 5 }}
-                      transition={{ duration: 0.2, ease: 'easeOut' }}
+                      whileHover={{ x: 6, scale: 1.01 }}
+                      transition={{ type: 'spring', stiffness: 300, damping: 25 }}
                       className={`relative overflow-hidden rounded-2xl p-5 sm:p-6 transition-colors duration-300 backdrop-blur-md border ${
                         isActive
                           ? 'bg-zinc-950/70 border-white/15 hover:border-[#00b848]/50 hover:bg-zinc-900/60 hover:shadow-[0_10px_35px_rgba(0,0,0,0.7),0_0_25px_rgba(0,184,72,0.15)]'
                           : 'bg-zinc-950/60 border-white/10 hover:border-white/25 hover:bg-zinc-900/50 hover:shadow-[0_10px_30px_rgba(0,0,0,0.6)]'
                       } group/card cursor-default`}
                     >
-                      {/* Subtle Living Shimmer Sweep on Hover */}
-                      <span className="pointer-events-none absolute inset-0 w-1/2 h-full bg-gradient-to-r from-transparent via-white/[0.04] to-transparent opacity-0 group-hover/card:opacity-100 animate-shimmer-sweep transition-opacity" />
-
                       {/* Header Row: Badge + Title side by side */}
                       <div className="flex flex-wrap items-center gap-3 mb-2">
                         {/* Badge */}

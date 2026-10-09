@@ -82,25 +82,39 @@ export const TopBar: React.FC<TopBarProps> = ({
     setMobileMenuOpen(false);
     setActiveSection(id);
 
+    const lenis = (window as unknown as { __lenis?: { scrollTo: (target: string | HTMLElement | number, opts: { offset?: number; duration?: number }) => void } }).__lenis;
+
     if (id === 'certifications' && currentView === 'certifications') {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      if (lenis) lenis.scrollTo(0, { duration: 1.2 });
+      else window.scrollTo({ top: 0, behavior: 'smooth' });
       return;
     }
 
     if (currentView !== 'home') {
       onNavigate('home');
       setTimeout(() => {
-        const el = document.querySelector(href);
-        if (el) el.scrollIntoView({ behavior: 'smooth' });
+        const el = document.querySelector(href) as HTMLElement | null;
+        if (el) {
+          if (lenis) lenis.scrollTo(el, { offset: -70, duration: 1.2 });
+          else el.scrollIntoView({ behavior: 'smooth' });
+        }
       }, 100);
     } else {
-      const el = document.querySelector(href);
-      if (el) el.scrollIntoView({ behavior: 'smooth' });
+      const el = document.querySelector(href) as HTMLElement | null;
+      if (el) {
+        if (lenis) lenis.scrollTo(el, { offset: -70, duration: 1.2 });
+        else el.scrollIntoView({ behavior: 'smooth' });
+      }
     }
   };
 
   return (
-    <header className="fixed top-4 inset-x-0 z-50 flex justify-center px-4 pointer-events-none">
+    <motion.header
+      initial={{ opacity: 0, y: -16 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1], delay: 0.1 }}
+      className="fixed top-4 inset-x-0 z-50 flex justify-center px-4 pointer-events-none"
+    >
       {/* Floating Rounded-Full Glass Pill Container */}
       <div className="pointer-events-auto max-w-4xl w-full rounded-full bg-zinc-950/80 backdrop-blur-2xl border border-white/15 px-5 sm:px-7 py-2 shadow-[0_12px_40px_rgba(0,0,0,0.7),0_0_25px_rgba(0,184,72,0.06),inset_0_1px_0_rgba(255,255,255,0.18)] flex items-center justify-between transition-all duration-300 hover:border-white/25">
         {/* Zone 1: Brand Wordmark */}
@@ -108,7 +122,9 @@ export const TopBar: React.FC<TopBarProps> = ({
           onClick={() => {
             setActiveSection(null);
             onNavigate('home');
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            const lenis = (window as unknown as { __lenis?: { scrollTo: (target: number, opts: { duration: number }) => void } }).__lenis;
+            if (lenis) lenis.scrollTo(0, { duration: 1.2 });
+            else window.scrollTo({ top: 0, behavior: 'smooth' });
           }}
           className="text-left group flex items-center cursor-pointer py-1"
         >
@@ -159,7 +175,6 @@ export const TopBar: React.FC<TopBarProps> = ({
             onClick={() => handleNavClick('#contact', 'contact')}
             className="relative overflow-hidden px-4 sm:px-5 py-2 text-xs font-dot font-semibold text-white bg-zinc-900/90 hover:bg-zinc-800 hover:text-[#00ff66] border border-white/20 hover:border-[#00b848]/60 rounded-full transition-all duration-300 flex items-center gap-1.5 whitespace-nowrap shadow-sm hover:shadow-[0_0_15px_rgba(0,184,72,0.3)] hover:scale-105 active:scale-95 cursor-pointer group tracking-wide"
           >
-            <span className="pointer-events-none absolute inset-0 w-1/2 h-full bg-gradient-to-r from-transparent via-[#00ff66]/15 to-transparent animate-shimmer-sweep" />
             <span className="relative z-10 font-medium">Let's Talk</span>
             <ArrowUpRight className="w-3.5 h-3.5 relative z-10 text-[#00ff66] group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
           </button>
@@ -202,6 +217,6 @@ export const TopBar: React.FC<TopBarProps> = ({
           </button>
         </div>
       )}
-    </header>
+    </motion.header>
   );
 };

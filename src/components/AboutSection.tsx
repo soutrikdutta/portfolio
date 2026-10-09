@@ -1,22 +1,35 @@
-import React from 'react';
-import { motion } from 'motion/react';
+import React, { useRef } from 'react';
+import { motion, useScroll, useSpring, useTransform } from 'motion/react';
 import { MapPin, GraduationCap, Sparkles } from 'lucide-react';
 import { FluxCard } from './FluxCard';
 import { GlyphDecryptText } from './GlyphDecryptText';
 import { PORTFOLIO_DATA } from '../data/portfolioData';
+import { useScrollDirection } from '../hooks/useScrollAnimation';
 
 export const AboutSection: React.FC = () => {
   const { profile } = PORTFOLIO_DATA;
+  const sectionRef = useRef<HTMLDivElement>(null);
+  const direction = useScrollDirection();
+
+  // Continuous bi-directional scroll parallax
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ['start end', 'end start'],
+  });
+  const smoothProgress = useSpring(scrollYProgress, { stiffness: 180, damping: 26 });
+  const narrativeY = useTransform(smoothProgress, [0, 1], [-12, 12]);
+  const specBoxY = useTransform(smoothProgress, [0, 1], [14, -14]);
+
+  const offset = direction === 'down' ? 24 : -24;
 
   return (
-    <section id="about" className="py-20 px-6 relative">
+    <section ref={sectionRef} id="about" className="py-20 px-6 relative">
       <div className="max-w-6xl mx-auto">
         {/* Section Header */}
-        {/* Section Header */}
         <motion.div
-          initial={{ opacity: 0, y: 24 }}
+          initial={{ opacity: 0, y: offset }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: false, amount: 0.15 }}
+          viewport={{ once: false, amount: 0.1 }}
           transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
           className="mb-12"
         >
@@ -38,46 +51,72 @@ export const AboutSection: React.FC = () => {
 
         {/* 2-Column Content Layout: Narrative + Spec Box */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-          {/* Main Story Narrative */}
+          {/* Main Story Narrative with Bi-directional Float */}
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            style={{ y: narrativeY }}
+            initial={{ opacity: 0, y: offset }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: false, amount: 0.08 }}
-            transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+            viewport={{ once: false, amount: 0.1 }}
+            transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
             className="lg:col-span-7 space-y-6 font-space transform-gpu will-change-transform"
           >
-            <p className="text-lg sm:text-xl text-white leading-relaxed font-medium">
+            <motion.p
+              initial={{ opacity: 0, y: offset * 0.7 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: false, amount: 0.1 }}
+              transition={{ duration: 0.55, delay: 0.05, ease: [0.16, 1, 0.3, 1] }}
+              className="text-lg sm:text-xl text-white leading-relaxed font-medium"
+            >
               I&apos;m a B.Tech student at{' '}
               <span className="text-white font-bold underline decoration-white/30 underline-offset-4">
                 Techno India University
               </span>
               , exploring technology through web development, coding, and hands-on projects.
-            </p>
+            </motion.p>
 
-            <p className="text-base sm:text-lg text-zinc-200 leading-relaxed">
+            <motion.p
+              initial={{ opacity: 0, y: offset * 0.7 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: false, amount: 0.1 }}
+              transition={{ duration: 0.55, delay: 0.12, ease: [0.16, 1, 0.3, 1] }}
+              className="text-base sm:text-lg text-zinc-200 leading-relaxed"
+            >
               I enjoy turning ideas into websites and applications using clean, efficient code and modern tools like{' '}
               <span className="text-white font-medium">generative AI</span>.
-            </p>
+            </motion.p>
 
-            <p className="text-base sm:text-lg text-zinc-300 leading-relaxed">
+            <motion.p
+              initial={{ opacity: 0, y: offset * 0.7 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: false, amount: 0.1 }}
+              transition={{ duration: 0.55, delay: 0.18, ease: [0.16, 1, 0.3, 1] }}
+              className="text-base sm:text-lg text-zinc-300 leading-relaxed"
+            >
               Currently, I&apos;m focused on learning, experimenting with new technologies, and building things that genuinely interest me.
-            </p>
+            </motion.p>
           </motion.div>
 
-          {/* Beside It: Spec Sheet Box */}
+          {/* Beside It: Spec Sheet Box with Bi-directional Float */}
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: false, amount: 0.08 }}
-            transition={{ duration: 0.5, delay: 0.08, ease: [0.22, 1, 0.36, 1] }}
+            style={{ y: specBoxY }}
+            initial={{ opacity: 0, scale: 0.97, y: offset }}
+            whileInView={{ opacity: 1, scale: 1, y: 0 }}
+            viewport={{ once: false, amount: 0.1 }}
+            transition={{ duration: 0.65, delay: 0.08, ease: [0.16, 1, 0.3, 1] }}
             className="lg:col-span-5 transform-gpu will-change-transform"
           >
             <FluxCard className="p-6 relative group border-white/10 hover:border-white/20">
-
-              {/* Data Key-Values with Vibrant Category Accents & Hover Spring */}
-              <div className="space-y-3.5 font-space text-sm">
+              {/* Data Key-Values with Category Accents & Staggered Scroll Reveal */}
+              <motion.div
+                variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.1, delayChildren: 0.08 } } }}
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: false, amount: 0.1 }}
+                className="space-y-3.5 font-space text-sm"
+              >
                 {/* Based in - Rose Accent */}
                 <motion.div
+                  variants={{ hidden: { opacity: 0, x: -16 }, visible: { opacity: 1, x: 0, transition: { duration: 0.45, ease: [0.22, 1, 0.36, 1] } } }}
                   whileHover={{ x: 5 }}
                   transition={{ type: 'spring', stiffness: 400, damping: 25 }}
                   className="p-3 rounded-xl bg-zinc-950/70 border border-white/5 flex items-start gap-3 hover:border-rose-500/40 hover:bg-zinc-900/60 transition-colors duration-200 cursor-default"
@@ -93,6 +132,7 @@ export const AboutSection: React.FC = () => {
 
                 {/* Currently - Blue Accent */}
                 <motion.div
+                  variants={{ hidden: { opacity: 0, x: -16 }, visible: { opacity: 1, x: 0, transition: { duration: 0.45, ease: [0.22, 1, 0.36, 1] } } }}
                   whileHover={{ x: 5 }}
                   transition={{ type: 'spring', stiffness: 400, damping: 25 }}
                   className="p-3 rounded-xl bg-zinc-950/70 border border-white/5 flex items-start gap-3 hover:border-blue-500/40 hover:bg-zinc-900/60 transition-colors duration-200 cursor-default"
@@ -108,6 +148,7 @@ export const AboutSection: React.FC = () => {
 
                 {/* Interests - Purple Accent */}
                 <motion.div
+                  variants={{ hidden: { opacity: 0, x: -16 }, visible: { opacity: 1, x: 0, transition: { duration: 0.45, ease: [0.22, 1, 0.36, 1] } } }}
                   whileHover={{ x: 5 }}
                   transition={{ type: 'spring', stiffness: 400, damping: 25 }}
                   className="p-3 rounded-xl bg-zinc-950/70 border border-white/5 flex items-start gap-3 hover:border-purple-500/40 hover:bg-zinc-900/60 transition-colors duration-200 cursor-default"
@@ -120,7 +161,7 @@ export const AboutSection: React.FC = () => {
                     <div className="text-purple-300 font-medium mt-0.5">{profile.interests}</div>
                   </div>
                 </motion.div>
-              </div>
+              </motion.div>
             </FluxCard>
           </motion.div>
         </div>
