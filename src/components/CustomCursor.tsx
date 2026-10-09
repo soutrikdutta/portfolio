@@ -1,42 +1,12 @@
-import React, { useEffect, useRef, useCallback, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 export const CustomCursor: React.FC = () => {
   const [enabled, setEnabled] = useState(false);
-
-  const dotRef = useRef<HTMLDivElement>(null);
-  const followerRef = useRef<HTMLDivElement>(null);
-  const rippleContainerRef = useRef<HTMLDivElement>(null);
-
-  const mouse = useRef({ x: -100, y: -100 });
-  const follower = useRef({ x: -100, y: -100 });
-  const visible = useRef(false);
-  const isHovered = useRef(false);
-  const isClicking = useRef(false);
-  const rafId = useRef<number>(0);
-  const lastCheckTime = useRef<number>(0);
+  const dotRef      = useRef<HTMLDivElement>(null);
+  const ringRef     = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // Only enable on desktop fine pointer devices
-    if (typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(pointer: fine)').matches) {
-      setEnabled(true);
-    }
-  }, []);
-
-  const animate = useCallback(() => {
-    const dx = mouse.current.x - follower.current.x;
-    const dy = mouse.current.y - follower.current.y;
-
-    if (Math.abs(dx) > 0.05 || Math.abs(dy) > 0.05) {
-      follower.current.x += dx * 0.9;
-      follower.current.y += dy * 0.9;
-
-      if (followerRef.current) {
-        const scale = isClicking.current ? 0.75 : isHovered.current ? 1.3 : 1.0;
-        followerRef.current.style.transform = `translate3d(${follower.current.x}px, ${follower.current.y}px, 0) scale(${scale})`;
-      }
-    }
-
-    rafId.current = requestAnimationFrame(animate);
+    if (window.matchMedia?.('(pointer: fine)').matches) setEnabled(true);
   }, []);
 
   useEffect(() => {
@@ -44,124 +14,137 @@ export const CustomCursor: React.FC = () => {
 
     document.documentElement.classList.add('custom-cursor-enabled');
 
-    const onMove = (e: MouseEvent) => {
-      mouse.current.x = e.clientX;
-      mouse.current.y = e.clientY;
+    // Raw cursor position — updated immediately on mousemove (no lerp)
+    let mx = -200, my = -200;
+    // Follower position — lerped in RAF
+    let fx = -200, fy = -200;
+    let rafId = 0;
+    let hovering = false;
+    let clicking = false;
+    let visible = false;
 
-      if (dotRef.current) {
-        dotRef.current.style.transform = `translate3d(${e.clientX}px, ${e.clientY}px, 0)`;
+    const dot  = dotRef.current!;
+    const ring = ringRef.current!;
+
+    function onMove(e: MouseEvent) {
+      mx = e.clientX;
+      my = e.clientY;
+
+      // Dot is zero-lag — move immediately via direct style
+      dot.style.transform = `translate3d(${mx}px,${my}px,0)`;
+
+      if (!visible) {
+        visible = true;
+        dot.style.opacity  = '1';
+        ring.style.opacity = '1';
       }
 
-      if (!visible.current) {
-        visible.current = true;
-        if (dotRef.current) dotRef.current.style.opacity = '1';
-        if (followerRef.current) followerRef.current.style.opacity = '1';
+      // Check interactive target (cheap: only test nodeName + classList)
+      const el = e.target as Element | null;
+      const h = !!(el?.closest('a,button,[role="button"],input,textarea,select,.cursor-pointer'));
+      if (h !== hovering) {
+        hovering = h;
+        ring.style.borderColor = h
+          ? 'rgba(0,255,102,0.65)'
+          : 'rgba(255,255,255,0.30)';
+        ring.style.width  = h ? '36px' : '28px';
+        ring.style.height = h ? '36px' : '28px';
+        ring.style.marginLeft = h ? '-18px' : '-14px';
+        ring.style.marginTop  = h ? '-18px' : '-14px';
       }
+    }
 
-      // Throttled interactive element check (at most once every 60ms)
-      const now = performance.now();
-      if (now - lastCheckTime.current > 60) {
-        lastCheckTime.current = now;
-        const target = e.target as HTMLElement | null;
-        if (target) {
-          const hovered = !!target.closest(
-            'a, button, [role="button"], input, textarea, select, .cursor-pointer, .interactive-hover'
-          );
-          if (hovered !== isHovered.current) {
-            isHovered.current = hovered;
-            if (followerRef.current) {
-              followerRef.current.style.borderColor = hovered
-                ? 'rgba(0, 184, 72, 0.6)'
-                : 'rgba(255, 255, 255, 0.35)';
-            }
-          }
-        }
+    function onDown() {
+      clicking = true;
+      dot.style.transform  = `translate3d(${mx}px,${my}px,0) scale(0.55)`;
+      ring.style.transform = `translate3d(${fx}px,${fy}px,0) scale(0.8)`;
+    }
+
+    function onUp() {
+      clicking = false;
+      dot.style.transform = `translate3d(${mx}px,${my}px,0)`;
+    }
+
+    function onLeave() {
+      visible = false;
+      dot.style.opacity  = '0';
+      ring.style.opacity = '0';
+    }
+
+    function onEnter() {
+      visible = true;
+      dot.style.opacity  = '1';
+      ring.style.opacity = '1';
+    }
+
+    // Ring follows with smooth lerp — LERP factor 0.18 = smooth but responsive
+    function tick() {
+      const dx = mx - fx;
+      const dy = my - fy;
+      if (Math.abs(dx) > 0.3 || Math.abs(dy) > 0.3) {
+        fx += dx * 0.18;
+        fy += dy * 0.18;
+        ring.style.transform = `translate3d(${fx}px,${fy}px,0)`;
       }
-    };
+      rafId = requestAnimationFrame(tick);
+    }
 
-    const onDown = (e: MouseEvent) => {
-      isClicking.current = true;
-      if (rippleContainerRef.current) {
-        const ripple = document.createElement('span');
-        ripple.style.cssText = `
-          position: fixed;
-          left: ${e.clientX}px;
-          top: ${e.clientY}px;
-          width: 0;
-          height: 0;
-          border-radius: 50%;
-          border: 1px solid rgba(0, 184, 72, 0.6);
-          transform: translate(-50%, -50%);
-          pointer-events: none;
-          z-index: 100000;
-          animation: quick-ripple 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-        `;
-        rippleContainerRef.current.appendChild(ripple);
-        ripple.addEventListener('animationend', () => ripple.remove());
-      }
-    };
-
-    const onUp = () => {
-      isClicking.current = false;
-    };
-
-    const onLeave = () => {
-      visible.current = false;
-      if (dotRef.current) dotRef.current.style.opacity = '0';
-      if (followerRef.current) followerRef.current.style.opacity = '0';
-    };
-
-    const onEnter = () => {
-      visible.current = true;
-      if (dotRef.current) dotRef.current.style.opacity = '1';
-      if (followerRef.current) followerRef.current.style.opacity = '1';
-    };
-
-    window.addEventListener('mousemove', onMove, { passive: true });
-    window.addEventListener('mousedown', onDown, { passive: true });
-    window.addEventListener('mouseup', onUp, { passive: true });
-    document.addEventListener('mouseleave', handleMouseLeave);
-    document.addEventListener('mouseenter', handleMouseEnter);
-
-    function handleMouseLeave() { onLeave(); }
-    function handleMouseEnter() { onEnter(); }
-
-    rafId.current = requestAnimationFrame(animate);
+    window.addEventListener('mousemove',  onMove,  { passive: true });
+    window.addEventListener('mousedown',  onDown,  { passive: true });
+    window.addEventListener('mouseup',    onUp,    { passive: true });
+    document.addEventListener('mouseleave', onLeave);
+    document.addEventListener('mouseenter', onEnter);
+    rafId = requestAnimationFrame(tick);
 
     return () => {
-      window.removeEventListener('mousemove', onMove);
-      window.removeEventListener('mousedown', onDown);
-      window.removeEventListener('mouseup', onUp);
-      document.removeEventListener('mouseleave', handleMouseLeave);
-      document.removeEventListener('mouseenter', handleMouseEnter);
-      cancelAnimationFrame(rafId.current);
+      cancelAnimationFrame(rafId);
+      window.removeEventListener('mousemove',  onMove);
+      window.removeEventListener('mousedown',  onDown);
+      window.removeEventListener('mouseup',    onUp);
+      document.removeEventListener('mouseleave', onLeave);
+      document.removeEventListener('mouseenter', onEnter);
       document.documentElement.classList.remove('custom-cursor-enabled');
     };
-  }, [enabled, animate]);
+  }, [enabled]);
 
   if (!enabled) return null;
 
   return (
     <>
-      {/* Precision Dot — 0ms lag, centered via -ml-[3px] -mt-[3px] */}
+      {/* Precision dot — zero lag, direct transform on mousemove */}
       <div
         ref={dotRef}
-        className="fixed top-0 left-0 pointer-events-none z-[100002] w-1.5 h-1.5 -ml-[3px] -mt-[3px] rounded-full bg-white transition-opacity duration-150 transform-gpu will-change-transform"
-        style={{ opacity: 0 }}
-      />
-
-      {/* Follower Reticle */}
-      <div
-        ref={followerRef}
-        className="fixed top-0 left-0 pointer-events-none z-[100001] w-7 h-7 -ml-3.5 -mt-3.5 rounded-full border bg-transparent transition-opacity duration-150 transform-gpu will-change-transform"
         style={{
+          position: 'fixed', top: 0, left: 0,
+          width: 6, height: 6,
+          marginLeft: -3, marginTop: -3,
+          borderRadius: '50%',
+          background: '#ffffff',
+          pointerEvents: 'none',
+          zIndex: 100002,
           opacity: 0,
-          borderColor: 'rgba(255, 255, 255, 0.35)'
+          willChange: 'transform',
+          transition: 'opacity 0.15s',
         }}
       />
 
-      {/* Click ripple container */}
-      <div ref={rippleContainerRef} className="pointer-events-none fixed inset-0 z-[100000]" />
+      {/* Smooth follower ring */}
+      <div
+        ref={ringRef}
+        style={{
+          position: 'fixed', top: 0, left: 0,
+          width: 28, height: 28,
+          marginLeft: -14, marginTop: -14,
+          borderRadius: '50%',
+          border: '1px solid rgba(255,255,255,0.30)',
+          background: 'transparent',
+          pointerEvents: 'none',
+          zIndex: 100001,
+          opacity: 0,
+          willChange: 'transform',
+          transition: 'opacity 0.15s, border-color 0.2s, width 0.2s, height 0.2s, margin 0.2s',
+        }}
+      />
     </>
   );
 };

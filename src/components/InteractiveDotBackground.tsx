@@ -1,163 +1,119 @@
 import React, { useEffect, useRef } from 'react';
 
 interface Dot {
-  originX: number;
-  originY: number;
-  x: number;
-  y: number;
-  vx: number;
-  vy: number;
-  baseRadius: number;
-  phase: number;
-}
-
-interface CircuitPoint {
-  x: number;
-  y: number;
-}
-
-interface CircuitPulse {
-  pos: number;
-  speed: number;
-  length: number;
-  color: string;
+  ox: number; oy: number;
+  x: number; y: number;
+  vx: number; vy: number;
+  r: number;
 }
 
 interface Circuit {
+  points: { x: number; y: number }[];
   path: Path2D;
-  points: CircuitPoint[];
-  totalLength: number;
-  baseAlpha: number;
+  totalLen: number;
   color: string;
   pulseColor: string;
-  pulses: CircuitPulse[];
-  hasTerminalStart: boolean;
-  hasTerminalEnd: boolean;
+  alpha: number;
+  pulses: Array<{ pos: number; speed: number; len: number }>;
+  hasStart: boolean;
+  hasEnd: boolean;
 }
 
-interface CyberParticle {
-  x: number;
-  y: number;
-  vx: number;
-  vy: number;
+interface Particle {
+  x: number; y: number;
+  vx: number; vy: number;
   size: number;
   color: string;
   alpha: number;
-  phase: number;
 }
 
-interface CanvasRipple {
-  x: number;
-  y: number;
-  radius: number;
-  maxRadius: number;
-  alpha: number;
-}
-
+/**
+ * Full animated background: circuits + particles + interactive dots
+ * — Everything on ONE canvas, 30fps cap, batched draws
+ * — Dots use single fill() call, circuits use cached Path2D
+ * — Mobile gets reduced counts
+ */
 export const InteractiveDotBackground: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const ctx = canvas.getContext('2d', { alpha: true });
+    const ctx = canvas.getContext('2d', { alpha: true, desynchronized: true });
     if (!ctx) return;
 
-    let animationFrameId: number;
-    let width = 0;
-    let height = 0;
+    // Non-null casts safe here — early returns above guarantee both exist
+    const cvs = canvas as HTMLCanvasElement;
+    const c = ctx as CanvasRenderingContext2D;
 
-    const isMobile =
-      typeof window !== 'undefined' &&
-      (window.innerWidth < 768 || (window.matchMedia && window.matchMedia('(pointer: coarse)').matches));
+    const isMobile = window.innerWidth < 768 || window.matchMedia('(pointer: coarse)').matches;
+    const dpr = isMobile ? 1 : Math.min(window.devicePixelRatio || 1, 1.25);
 
-    // Cap DPR to 1 on mobile to prevent multi-megapixel overdraw; max 1.5 on desktop
-    const dpr = isMobile ? 1 : Math.min(window.devicePixelRatio || 1, 1.5);
+    let w = 0, h = 0;
+    let rafId = 0;
+    let lastFrame = 0;
+    const FPS_TARGET = 30;
+    const FRAME_TIME = 1000 / FPS_TARGET;
 
-    let isScrolling = false;
-    let scrollTimeout: ReturnType<typeof setTimeout> | null = null;
+    // Mouse
+    let mx = -1000, my = -1000;
+    let mouseActive = false;
 
-    const handleScroll = () => {
-      isScrolling = true;
-      if (scrollTimeout) clearTimeout(scrollTimeout);
-      scrollTimeout = setTimeout(() => {
-        isScrolling = false;
-      }, 70);
-    };
-
-    window.addEventListener('scroll', handleScroll, { passive: true });
-
-    let mouse = {
-      x: -1000,
-      y: -1000,
-      targetX: -1000,
-      targetY: -1000,
-      active: false,
-      speed: 0
-    };
-
-    let prevMouse = { x: -1000, y: -1000 };
-    let ripples: CanvasRipple[] = [];
-    let circuits: Circuit[] = [];
-    let particles: CyberParticle[] = [];
     let dots: Dot[] = [];
+    let circuits: Circuit[] = [];
+    let particles: Particle[] = [];
 
-    // Helper: calculate point along circuit path
-    const getPointAtDistance = (circ: Circuit, dist: number): CircuitPoint => {
-      if (circ.points.length <= 1) return circ.points[0] || { x: 0, y: 0 };
-      let accumulated = 0;
-      for (let i = 1; i < circ.points.length; i++) {
-        const p1 = circ.points[i - 1];
-        const p2 = circ.points[i];
-        const segDist = Math.hypot(p2.x - p1.x, p2.y - p1.y);
-        if (accumulated + segDist >= dist || i === circ.points.length - 1) {
-          const ratio = segDist === 0 ? 0 : Math.max(0, Math.min(1, (dist - accumulated) / segDist));
-          return {
-            x: p1.x + (p2.x - p1.x) * ratio,
-            y: p1.y + (p2.y - p1.y) * ratio
-          };
+    const DOT_SPACING = isMobile ? 70 : 52;
+    const DOT_R = 0.9;
+    const INFLUENCE_R = isMobile ? 0 : 90;
+    const INFLUENCE_SQ = INFLUENCE_R * INFLUENCE_R;
+
+    function initDots() {
+      dots = [];
+      const cols = Math.ceil(w / DOT_SPACING) + 2;
+      const rows = Math.ceil(h / DOT_SPACING) + 2;
+      for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+          const ox = -DOT_SPACING + c * DOT_SPACING;
+          const oy = -DOT_SPACING + r * DOT_SPACING;
+          dots.push({ ox, oy, x: ox, y: oy, vx: 0, vy: 0, r: DOT_R });
         }
-        accumulated += segDist;
       }
-      return circ.points[circ.points.length - 1];
-    };
+    }
 
-    const generateCircuits = () => {
+    function initCircuits() {
       circuits = [];
-      // Dynamic circuit traces for energetic cyberpunk atmosphere
-      const numCircuits = isMobile ? 6 : Math.min(16, Math.max(10, Math.floor((width * height) / 75000)));
-
-      const colorSchemes = [
+      const count = isMobile ? 4 : 8;
+      const schemes = [
         { stroke: '#00b848', pulse: '#00ff66' },
         { stroke: '#059669', pulse: '#34d399' },
         { stroke: '#06b6d4', pulse: '#22d3ee' },
-        { stroke: '#0d9488', pulse: '#5eead4' }
+        { stroke: '#0d9488', pulse: '#5eead4' },
       ];
 
-      for (let i = 0; i < numCircuits; i++) {
-        const startX = Math.random() * (width + 80) - 40;
-        const startY = Math.random() * (height + 80) - 40;
-        const points: CircuitPoint[] = [{ x: startX, y: startY }];
+      for (let i = 0; i < count; i++) {
+        const sx = Math.random() * (w + 80) - 40;
+        const sy = Math.random() * (h + 80) - 40;
+        const points = [{ x: sx, y: sy }];
 
-        let currX = startX;
-        let currY = startY;
-        const steps = isMobile ? 2 : 3 + Math.floor(Math.random() * 2);
-        let lastDir = Math.floor(Math.random() * 4);
+        let cx = sx, cy = sy;
+        const steps = isMobile ? 2 : 3;
+        let dir = Math.floor(Math.random() * 4);
 
         for (let s = 0; s < steps; s++) {
-          const segLength = 70 + Math.floor(Math.random() * 3) * 40;
+          const len = 70 + Math.floor(Math.random() * 3) * 40;
           if (Math.random() < 0.75) {
-            lastDir = (lastDir + (Math.random() > 0.5 ? 1 : 3)) % 4;
-            if (lastDir === 0) currX += segLength;
-            else if (lastDir === 1) currY += segLength;
-            else if (lastDir === 2) currX -= segLength;
-            else currY -= segLength;
+            dir = (dir + (Math.random() > 0.5 ? 1 : 3)) % 4;
+            if (dir === 0) cx += len;
+            else if (dir === 1) cy += len;
+            else if (dir === 2) cx -= len;
+            else cy -= len;
           } else {
-            const diagDist = segLength * 0.707;
-            currX += (Math.random() > 0.5 ? 1 : -1) * diagDist;
-            currY += (Math.random() > 0.5 ? 1 : -1) * diagDist;
+            const d = len * 0.707;
+            cx += (Math.random() > 0.5 ? 1 : -1) * d;
+            cy += (Math.random() > 0.5 ? 1 : -1) * d;
           }
-          points.push({ x: currX, y: currY });
+          points.push({ x: cx, y: cy });
         }
 
         const path = new Path2D();
@@ -168,346 +124,260 @@ export const InteractiveDotBackground: React.FC = () => {
           totalLen += Math.hypot(points[p].x - points[p - 1].x, points[p].y - points[p - 1].y);
         }
 
-        const scheme = colorSchemes[i % colorSchemes.length];
-        const pulses: CircuitPulse[] = [];
-        const pulseCount = isMobile ? 1 : Math.random() > 0.5 ? 2 : 1;
+        const scheme = schemes[i % schemes.length];
+        const pulseCount = isMobile ? 1 : (Math.random() > 0.5 ? 2 : 1);
+        const pulses = [];
         for (let j = 0; j < pulseCount; j++) {
           pulses.push({
             pos: Math.random(),
-            speed: (0.0024 + Math.random() * 0.0018) * (isMobile ? 0.8 : 1),
-            length: 45 + Math.random() * 35,
-            color: scheme.pulse
+            speed: (0.002 + Math.random() * 0.0015) * (isMobile ? 0.8 : 1),
+            len: 40 + Math.random() * 30,
           });
         }
 
         circuits.push({
-          path,
           points,
-          totalLength: totalLen,
-          baseAlpha: 0.13 + Math.random() * 0.08,
+          path,
+          totalLen,
           color: scheme.stroke,
           pulseColor: scheme.pulse,
+          alpha: 0.12 + Math.random() * 0.06,
           pulses,
-          hasTerminalStart: Math.random() > 0.3,
-          hasTerminalEnd: Math.random() > 0.3
+          hasStart: Math.random() > 0.3,
+          hasEnd: Math.random() > 0.3,
         });
       }
-    };
+    }
 
-    const initParticles = () => {
+    function initParticles() {
       particles = [];
-      const count = isMobile ? 10 : 26;
+      const count = isMobile ? 8 : 20;
       const palette = ['#00b848', '#00ff66', '#06b6d4', '#10b981'];
       for (let i = 0; i < count; i++) {
         particles.push({
-          x: Math.random() * width,
-          y: Math.random() * height,
-          vx: (Math.random() - 0.5) * 0.3,
-          vy: -0.2 - Math.random() * 0.35,
-          size: 1 + Math.random() * 1.8,
+          x: Math.random() * w,
+          y: Math.random() * h,
+          vx: (Math.random() - 0.5) * 0.25,
+          vy: -0.15 - Math.random() * 0.3,
+          size: 1 + Math.random() * 1.6,
           color: palette[i % palette.length],
-          alpha: 0.20 + Math.random() * 0.30,
-          phase: Math.random() * Math.PI * 2
+          alpha: 0.18 + Math.random() * 0.25,
         });
       }
-    };
-
-    const SPACING = isMobile ? 70 : 54;
-    const initDots = () => {
-      dots = [];
-      const cols = Math.ceil(width / SPACING) + 2;
-      const rows = Math.ceil(height / SPACING) + 2;
-      const startX = -SPACING;
-      const startY = -SPACING;
-
-      for (let r = 0; r < rows; r++) {
-        for (let c = 0; c < cols; c++) {
-          const originX = startX + c * SPACING;
-          const originY = startY + r * SPACING;
-          dots.push({
-            originX,
-            originY,
-            x: originX,
-            y: originY,
-            vx: 0,
-            vy: 0,
-            baseRadius: 0.9,
-            phase: Math.random() * Math.PI * 2
-          });
-        }
-      }
-    };
-
-    const initAll = () => {
-      width = window.innerWidth;
-      height = window.innerHeight;
-      canvas.width = Math.floor(width * dpr);
-      canvas.height = Math.floor(height * dpr);
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-
-      generateCircuits();
-      initParticles();
-      initDots();
-    };
-
-    initAll();
-
-    const handleResize = () => {
-      initAll();
-    };
-
-    const handleMouseMove = (e: MouseEvent) => {
-      mouse.targetX = e.clientX;
-      mouse.targetY = e.clientY;
-      mouse.active = true;
-    };
-
-    const handleMouseLeave = () => {
-      mouse.active = false;
-      mouse.targetX = -1000;
-      mouse.targetY = -1000;
-    };
-
-    const handleMouseDown = (e: MouseEvent) => {
-      if (isMobile) return;
-      ripples.push({
-        x: e.clientX,
-        y: e.clientY,
-        radius: 2,
-        maxRadius: 20,
-        alpha: 0.35
-      });
-    };
-
-    window.addEventListener('resize', handleResize, { passive: true });
-    if (!isMobile) {
-      window.addEventListener('mousemove', handleMouseMove, { passive: true });
-      window.addEventListener('mousedown', handleMouseDown, { passive: true });
-      document.addEventListener('mouseleave', handleMouseLeave);
     }
 
-    let time = 0;
-    const render = () => {
-      time += 0.016;
+    function resize() {
+      w = window.innerWidth;
+      h = window.innerHeight;
+      cvs.width = Math.round(w * dpr);
+      cvs.height = Math.round(h * dpr);
+      c.setTransform(dpr, 0, 0, dpr, 0, 0);
+      initDots();
+      initCircuits();
+      initParticles();
+    }
 
-      // Mouse smoothing
-      if (mouse.active && !isMobile) {
-        mouse.x += (mouse.targetX - mouse.x) * 0.18;
-        mouse.y += (mouse.targetY - mouse.y) * 0.18;
-        const dxm = mouse.x - prevMouse.x;
-        const dym = mouse.y - prevMouse.y;
-        mouse.speed = Math.min(Math.hypot(dxm, dym), 30);
-        prevMouse.x = mouse.x;
-        prevMouse.y = mouse.y;
-      } else {
-        mouse.x = -1000;
-        mouse.y = -1000;
-        mouse.speed = 0;
-      }
+    resize();
 
-      ctx.clearRect(0, 0, width, height);
+    function onMouseMove(e: MouseEvent) {
+      mx = e.clientX;
+      my = e.clientY;
+      mouseActive = true;
+    }
+    function onMouseLeave() {
+      mouseActive = false;
+      mx = -1000;
+      my = -1000;
+    }
 
-      // --- 1. CLICK RIPPLES (Desktop only) ---
-      if (!isMobile) {
-        for (let r = ripples.length - 1; r >= 0; r--) {
-          const rip = ripples[r];
-          rip.radius += 2.0;
-          rip.alpha *= 0.85;
+    if (!isMobile) {
+      window.addEventListener('mousemove', onMouseMove, { passive: true });
+      document.addEventListener('mouseleave', onMouseLeave);
+    }
+    window.addEventListener('resize', resize, { passive: true });
 
-          if (rip.alpha < 0.02 || rip.radius > rip.maxRadius) {
-            ripples.splice(r, 1);
-            continue;
-          }
-
-          ctx.save();
-          ctx.lineWidth = 1.0;
-          ctx.strokeStyle = '#00ff66';
-          ctx.globalAlpha = rip.alpha;
-          ctx.beginPath();
-          ctx.arc(rip.x, rip.y, rip.radius, 0, Math.PI * 2);
-          ctx.stroke();
-          ctx.restore();
+    function getPointAt(circ: Circuit, dist: number) {
+      if (circ.points.length <= 1) return circ.points[0];
+      let acc = 0;
+      for (let i = 1; i < circ.points.length; i++) {
+        const p1 = circ.points[i - 1];
+        const p2 = circ.points[i];
+        const seg = Math.hypot(p2.x - p1.x, p2.y - p1.y);
+        if (acc + seg >= dist || i === circ.points.length - 1) {
+          const ratio = seg === 0 ? 0 : Math.max(0, Math.min(1, (dist - acc) / seg));
+          return { x: p1.x + (p2.x - p1.x) * ratio, y: p1.y + (p2.y - p1.y) * ratio };
         }
+        acc += seg;
       }
+      return circ.points[circ.points.length - 1];
+    }
 
-      // --- 2. ALIEN CIRCUITS (GPU friendly - NO expensive canvas shadowBlur) ---
-      for (let c = 0; c < circuits.length; c++) {
-        const circ = circuits[c];
+    function render(time: number) {
+      // 30fps cap
+      if (time - lastFrame < FRAME_TIME) {
+        rafId = requestAnimationFrame(render);
+        return;
+      }
+      lastFrame = time;
 
-        ctx.save();
-        ctx.lineWidth = 1.0;
-        ctx.strokeStyle = circ.color;
-        ctx.globalAlpha = circ.baseAlpha;
-        ctx.stroke(circ.path);
-        ctx.restore();
+      c.clearRect(0, 0, w, h);
+
+      // --- 1. CIRCUITS ---
+      for (const circ of circuits) {
+        // Base path
+        c.save();
+        c.lineWidth = 1;
+        c.strokeStyle = circ.color;
+        c.globalAlpha = circ.alpha;
+        c.stroke(circ.path);
+        c.restore();
 
         // Terminal nodes
         if (!isMobile) {
-          if (circ.hasTerminalStart && circ.points.length > 0) {
-            const pStart = circ.points[0];
-            ctx.save();
-            ctx.globalAlpha = circ.baseAlpha * 1.5;
-            ctx.fillStyle = circ.pulseColor;
-            ctx.beginPath();
-            ctx.arc(pStart.x, pStart.y, 1.5, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.restore();
+          if (circ.hasStart) {
+            const p = circ.points[0];
+            c.save();
+            c.globalAlpha = circ.alpha * 1.5;
+            c.fillStyle = circ.pulseColor;
+            c.beginPath();
+            c.arc(p.x, p.y, 1.5, 0, Math.PI * 2);
+            c.fill();
+            c.restore();
           }
-
-          if (circ.hasTerminalEnd && circ.points.length > 1) {
-            const pEnd = circ.points[circ.points.length - 1];
-            ctx.save();
-            ctx.globalAlpha = circ.baseAlpha * 1.5;
-            ctx.fillStyle = circ.pulseColor;
-            ctx.beginPath();
-            ctx.arc(pEnd.x, pEnd.y, 1.5, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.restore();
+          if (circ.hasEnd) {
+            const p = circ.points[circ.points.length - 1];
+            c.save();
+            c.globalAlpha = circ.alpha * 1.5;
+            c.fillStyle = circ.pulseColor;
+            c.beginPath();
+            c.arc(p.x, p.y, 1.5, 0, Math.PI * 2);
+            c.fill();
+            c.restore();
           }
         }
 
-        // Circuit pulses (clean, hardware-accelerated dual-stroke instead of software shadowBlur)
-        for (let p = 0; p < circ.pulses.length; p++) {
-          const pulse = circ.pulses[p];
+        // Pulses
+        for (const pulse of circ.pulses) {
           pulse.pos += pulse.speed;
           if (pulse.pos > 1) pulse.pos = 0;
 
-          const headDist = pulse.pos * circ.totalLength;
-          const headPt = getPointAtDistance(circ, headDist);
+          const headDist = pulse.pos * circ.totalLen;
+          const headPt = getPointAt(circ, headDist);
 
-          ctx.save();
-          ctx.lineWidth = 1.6;
-          ctx.strokeStyle = pulse.color;
-          ctx.globalAlpha = 0.50;
-          ctx.setLineDash([pulse.length, Math.max(1000, circ.totalLength * 3)]);
-          ctx.lineDashOffset = -headDist + pulse.length;
-          ctx.stroke(circ.path);
-          ctx.setLineDash([]);
+          c.save();
+          c.lineWidth = 1.5;
+          c.strokeStyle = circ.pulseColor;
+          c.globalAlpha = 0.45;
+          c.setLineDash([pulse.len, Math.max(1000, circ.totalLen * 3)]);
+          c.lineDashOffset = -headDist + pulse.len;
+          c.stroke(circ.path);
+          c.setLineDash([]);
 
-          // Bright living pulse head
-          ctx.fillStyle = '#ffffff';
-          ctx.beginPath();
-          ctx.arc(headPt.x, headPt.y, 1.4, 0, Math.PI * 2);
-          ctx.fill();
+          c.fillStyle = '#ffffff';
+          c.beginPath();
+          c.arc(headPt.x, headPt.y, 1.3, 0, Math.PI * 2);
+          c.fill();
 
-          ctx.fillStyle = pulse.color;
-          ctx.beginPath();
-          ctx.arc(headPt.x, headPt.y, 2.2, 0, Math.PI * 2);
-          ctx.fill();
-          ctx.restore();
+          c.fillStyle = circ.pulseColor;
+          c.beginPath();
+          c.arc(headPt.x, headPt.y, 2, 0, Math.PI * 2);
+          c.fill();
+          c.restore();
         }
       }
 
-      // --- 3. PARTICLES ---
-      for (let i = 0; i < particles.length; i++) {
-        const pt = particles[i];
+      // --- 2. PARTICLES ---
+      for (const pt of particles) {
         pt.x += pt.vx;
         pt.y += pt.vy;
-
         if (pt.y < -10) {
-          pt.y = height + 10;
-          pt.x = Math.random() * width;
+          pt.y = h + 10;
+          pt.x = Math.random() * w;
         }
-        if (pt.x < -10) pt.x = width + 10;
-        if (pt.x > width + 10) pt.x = -10;
+        if (pt.x < -10) pt.x = w + 10;
+        if (pt.x > w + 10) pt.x = -10;
 
-        ctx.save();
-        ctx.globalAlpha = pt.alpha;
-        ctx.fillStyle = pt.color;
-        ctx.beginPath();
-        ctx.arc(pt.x, pt.y, pt.size, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.restore();
+        c.save();
+        c.globalAlpha = pt.alpha;
+        c.fillStyle = pt.color;
+        c.beginPath();
+        c.arc(pt.x, pt.y, pt.size, 0, Math.PI * 2);
+        c.fill();
+        c.restore();
       }
 
-      // --- 4. DOT MATRIX (Batched Single-Path Draw Call) ---
-      const INFLUENCE_RADIUS = 100;
-      const INFLUENCE_RADIUS_SQ = INFLUENCE_RADIUS * INFLUENCE_RADIUS;
+      // --- 3. DOT MATRIX (batched) ---
+      c.beginPath();
+      c.fillStyle = 'rgba(255,255,255,0.065)';
 
-      ctx.beginPath();
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.065)';
-
-      for (let i = 0; i < dots.length; i++) {
-        const dot = dots[i];
-
-        if (!isMobile && mouse.active && !isScrolling) {
-          const dx = dot.x - mouse.x;
-          const dy = dot.y - mouse.y;
-
-          if (Math.abs(dx) < INFLUENCE_RADIUS && Math.abs(dy) < INFLUENCE_RADIUS) {
-            const distSq = dx * dx + dy * dy;
-            if (distSq < INFLUENCE_RADIUS_SQ) {
-              const dist = Math.sqrt(distSq);
-              const force = (1 - dist / INFLUENCE_RADIUS);
-              const pushDistance = force * 22;
-              const angle = Math.atan2(dy, dx);
-              dot.vx += (Math.cos(angle) * pushDistance - (dot.x - dot.originX)) * 0.08;
-              dot.vy += (Math.sin(angle) * pushDistance - (dot.y - dot.originY)) * 0.08;
-            } else if (dot.vx !== 0 || dot.vy !== 0) {
-              dot.vx += (dot.originX - dot.x) * 0.06;
-              dot.vy += (dot.originY - dot.y) * 0.06;
+      for (const d of dots) {
+        if (!isMobile && mouseActive) {
+          const dx = d.x - mx;
+          const dy = d.y - my;
+          if (Math.abs(dx) < INFLUENCE_R && Math.abs(dy) < INFLUENCE_R) {
+            const dSq = dx * dx + dy * dy;
+            if (dSq < INFLUENCE_SQ) {
+              const dist = Math.sqrt(dSq) || 0.001;
+              const force = (1 - dist / INFLUENCE_R) * 18;
+              d.vx += (dx / dist) * force * 0.08;
+              d.vy += (dy / dist) * force * 0.08;
             }
-          } else if (dot.vx !== 0 || dot.vy !== 0 || dot.x !== dot.originX || dot.y !== dot.originY) {
-            dot.vx += (dot.originX - dot.x) * 0.06;
-            dot.vy += (dot.originY - dot.y) * 0.06;
           }
-
-          if (dot.vx !== 0 || dot.vy !== 0) {
-            dot.vx *= 0.85;
-            dot.vy *= 0.85;
-            if (Math.abs(dot.vx) < 0.01) dot.vx = 0;
-            if (Math.abs(dot.vy) < 0.01) dot.vy = 0;
-            dot.x += dot.vx;
-            dot.y += dot.vy;
-          }
-        } else if (dot.x !== dot.originX || dot.y !== dot.originY) {
-          dot.x += (dot.originX - dot.x) * 0.1;
-          dot.y += (dot.originY - dot.y) * 0.1;
-          if (Math.abs(dot.x - dot.originX) < 0.05) dot.x = dot.originX;
-          if (Math.abs(dot.y - dot.originY) < 0.05) dot.y = dot.originY;
         }
 
-        ctx.moveTo(dot.x + dot.baseRadius, dot.y);
-        ctx.arc(dot.x, dot.y, dot.baseRadius, 0, Math.PI * 2);
+        // Spring back
+        d.vx += (d.ox - d.x) * 0.07;
+        d.vy += (d.oy - d.y) * 0.07;
+        d.vx *= 0.78;
+        d.vy *= 0.78;
+
+        if (Math.abs(d.vx) < 0.02) d.vx = 0;
+        if (Math.abs(d.vy) < 0.02) d.vy = 0;
+
+        d.x += d.vx;
+        d.y += d.vy;
+
+        if (Math.abs(d.x - d.ox) < 0.05 && !d.vx) d.x = d.ox;
+        if (Math.abs(d.y - d.oy) < 0.05 && !d.vy) d.y = d.oy;
+
+        c.moveTo(d.x + d.r, d.y);
+        c.arc(d.x, d.y, d.r, 0, Math.PI * 2);
       }
 
-      ctx.fill();
+      c.fill();
 
-      animationFrameId = requestAnimationFrame(render);
-    };
+      rafId = requestAnimationFrame(render);
+    }
 
-    render();
+    rafId = requestAnimationFrame(render);
 
     return () => {
-      cancelAnimationFrame(animationFrameId);
-      if (scrollTimeout) clearTimeout(scrollTimeout);
-      window.removeEventListener('scroll', handleScroll);
-      window.removeEventListener('resize', handleResize);
+      cancelAnimationFrame(rafId);
+      window.removeEventListener('resize', resize);
       if (!isMobile) {
-        window.removeEventListener('mousemove', handleMouseMove);
-        window.removeEventListener('mousedown', handleMouseDown);
-        document.removeEventListener('mouseleave', handleMouseLeave);
+        window.removeEventListener('mousemove', onMouseMove);
+        document.removeEventListener('mouseleave', onMouseLeave);
       }
     };
   }, []);
 
   return (
-    <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden transform-gpu will-change-transform">
-      {/* Optimized Atmosphere Base with Smooth Radial Gradients */}
-      <div 
-        className="absolute inset-0 bg-[#040504]/82"
+    <div
+      className="fixed inset-0 pointer-events-none z-0 overflow-hidden"
+      style={{ contain: 'strict' }}
+    >
+      {/* Static radial gradient base */}
+      <div
+        className="absolute inset-0 bg-[#040504]/80"
         style={{
           backgroundImage: `
-            radial-gradient(circle at 18% 25%, rgba(0, 184, 72, 0.065) 0%, transparent 50%),
-            radial-gradient(circle at 82% 70%, rgba(6, 182, 212, 0.055) 0%, transparent 50%),
-            radial-gradient(circle at 50% 50%, rgba(0, 255, 102, 0.025) 0%, transparent 70%)
-          `
+            radial-gradient(circle at 18% 25%, rgba(0,184,72,0.06) 0%, transparent 50%),
+            radial-gradient(circle at 82% 70%, rgba(6,182,212,0.05) 0%, transparent 50%),
+            radial-gradient(circle at 50% 50%, rgba(0,255,102,0.02) 0%, transparent 70%)
+          `,
         }}
       />
-      <canvas
-        ref={canvasRef}
-        className="absolute inset-0 w-full h-full"
-      />
+      <canvas ref={canvasRef} className="absolute inset-0 w-full h-full" />
     </div>
   );
 };

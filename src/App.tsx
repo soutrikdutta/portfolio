@@ -1,4 +1,8 @@
 import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
+import Lenis from 'lenis';
+import 'lenis/dist/lenis.css';
+
 import { TopBar } from './components/TopBar';
 import { HeroSection } from './components/HeroSection';
 import { AboutSection } from './components/AboutSection';
@@ -13,24 +17,82 @@ import { Footer } from './components/Footer';
 import { InteractiveDotBackground } from './components/InteractiveDotBackground';
 import { CustomCursor } from './components/CustomCursor';
 import { ScrollProgressBar } from './components/ScrollProgressBar';
-import { SectionDivider } from './components/SectionDivider';
 import { CommandPalette } from './components/CommandPalette';
 import { LiveDemoUnavailableModal } from './components/LiveDemoUnavailableModal';
+import { ScrollToTopButton } from './components/ScrollToTopButton';
 
 export default function App() {
   const [currentView, setCurrentView] = useState<'home' | 'certifications'>('home');
   const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
 
+  // Initialize buttery-smooth momentum scrolling with Lenis
+  useEffect(() => {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      return;
+    }
+
+    const lenis = new Lenis({
+      duration: 1.2,
+      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      orientation: 'vertical',
+      gestureOrientation: 'vertical',
+      smoothWheel: true,
+      wheelMultiplier: 1.05,
+      touchMultiplier: 1.2,
+    });
+
+    (window as unknown as { __lenis?: Lenis }).__lenis = lenis;
+
+    let rafId: number;
+    function raf(time: number) {
+      lenis.raf(time);
+      rafId = requestAnimationFrame(raf);
+    }
+    rafId = requestAnimationFrame(raf);
+
+    return () => {
+      cancelAnimationFrame(rafId);
+      lenis.destroy();
+      delete (window as unknown as { __lenis?: Lenis }).__lenis;
+    };
+  }, []);
+
+  // Pause Lenis when command palette is open
+  useEffect(() => {
+    const lenis = (window as unknown as { __lenis?: Lenis }).__lenis;
+    if (lenis) {
+      if (isCommandPaletteOpen) {
+        lenis.stop();
+      } else {
+        lenis.start();
+      }
+    }
+  }, [isCommandPaletteOpen]);
+
   const scrollToSection = (sectionId: string) => {
+    const lenis = (window as unknown as { __lenis?: Lenis }).__lenis;
+
     if (currentView !== 'home') {
       setCurrentView('home');
       setTimeout(() => {
         const el = document.getElementById(sectionId);
-        if (el) el.scrollIntoView({ behavior: 'smooth' });
+        if (el) {
+          if (lenis) {
+            lenis.scrollTo(el, { offset: -70, duration: 1.2 });
+          } else {
+            el.scrollIntoView({ behavior: 'smooth' });
+          }
+        }
       }, 100);
     } else {
       const el = document.getElementById(sectionId);
-      if (el) el.scrollIntoView({ behavior: 'smooth' });
+      if (el) {
+        if (lenis) {
+          lenis.scrollTo(el, { offset: -70, duration: 1.2 });
+        } else {
+          el.scrollIntoView({ behavior: 'smooth' });
+        }
+      }
     }
   };
 
@@ -39,7 +101,12 @@ export default function App() {
       window.history.pushState({ view: 'certifications' }, '', '#all-certifications');
     } catch (_) {}
     setCurrentView('certifications');
-    window.scrollTo({ top: 0, behavior: 'instant' });
+    const lenis = (window as unknown as { __lenis?: Lenis }).__lenis;
+    if (lenis) {
+      lenis.scrollTo(0, { duration: 0.1 });
+    } else {
+      window.scrollTo({ top: 0, behavior: 'instant' });
+    }
   };
 
   const backToPortfolioFromCertifications = () => {
@@ -51,12 +118,17 @@ export default function App() {
       }
     } catch (_) {}
 
-    // Scroll back to the Certifications section on the home page with auto behavior
+    // Scroll back to the Certifications section on the home page with silky easing
     setTimeout(() => {
       document.body.style.overflow = '';
       const el = document.getElementById('certifications');
+      const lenis = (window as unknown as { __lenis?: Lenis }).__lenis;
       if (el) {
-        el.scrollIntoView({ behavior: 'auto', block: 'start' });
+        if (lenis) {
+          lenis.scrollTo(el, { offset: -70, duration: 1 });
+        } else {
+          el.scrollIntoView({ behavior: 'auto', block: 'start' });
+        }
       }
     }, 40);
   };
@@ -70,8 +142,13 @@ export default function App() {
         setTimeout(() => {
           document.body.style.overflow = '';
           const el = document.getElementById('certifications');
+          const lenis = (window as unknown as { __lenis?: Lenis }).__lenis;
           if (el) {
-            el.scrollIntoView({ behavior: 'auto', block: 'start' });
+            if (lenis) {
+              lenis.scrollTo(el, { offset: -70, duration: 1 });
+            } else {
+              el.scrollIntoView({ behavior: 'auto', block: 'start' });
+            }
           }
         }, 40);
       }
@@ -90,13 +167,16 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-[#040504] text-zinc-100 flex flex-col font-space selection:bg-[#00b848]/30 selection:text-white relative">
-      {/* Ambient Color Depth Atmosphere - Floating Living Luminous Auroras */}
-      <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden transform-gpu will-change-transform opacity-90">
-        <div className="absolute top-[5%] left-[8%] w-[550px] h-[550px] rounded-full bg-emerald-500/[0.12] blur-[140px] animate-float-subtle" />
-        <div className="absolute top-[32%] right-[5%] w-[500px] h-[500px] rounded-full bg-cyan-500/[0.09] blur-[130px] animate-float-delayed" />
-        <div className="absolute top-[58%] left-[5%] w-[520px] h-[520px] rounded-full bg-purple-600/[0.07] blur-[150px] animate-float-subtle" />
-        <div className="absolute top-[82%] right-[10%] w-[560px] h-[560px] rounded-full bg-emerald-500/[0.11] blur-[140px] animate-float-delayed" />
-      </div>
+      {/* Ambient atmosphere — radial gradient */}
+      <div
+        className="pointer-events-none fixed inset-0 z-0"
+        style={{
+          background: `
+            radial-gradient(ellipse 60% 50% at 15% 20%, rgba(0,184,72,0.07) 0%, transparent 70%),
+            radial-gradient(ellipse 55% 45% at 85% 75%, rgba(6,182,212,0.06) 0%, transparent 70%)
+          `,
+        }}
+      />
 
       {/* Interactive Cursor-Reactive Light Dot Background */}
       <InteractiveDotBackground />
@@ -135,53 +215,60 @@ export default function App() {
 
       {/* Main View Router */}
       <main className="flex-1">
-        {currentView === 'home' ? (
-          <>
-            {/* Hero Section with Jumbled Pixel Decrypt Animation & Channels */}
-            <HeroSection
-              onScrollToProjects={() => scrollToSection('projects')}
-              onScrollToContact={() => scrollToSection('contact')}
-              onScrollToCertifications={() => scrollToSection('certifications')}
-            />
+        <AnimatePresence mode="wait">
+          {currentView === 'home' ? (
+            <motion.div
+              key="home"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+            >
+              {/* Hero Section with Jumbled Pixel Decrypt Animation & Channels */}
+              <HeroSection
+                onScrollToProjects={() => scrollToSection('projects')}
+                onScrollToContact={() => scrollToSection('contact')}
+                onScrollToCertifications={() => scrollToSection('certifications')}
+              />
 
-            <SectionDivider />
+              {/* About Me Section with Requested Bio & Spec Box */}
+              <AboutSection />
 
-            {/* About Me Section with Requested Bio & Spec Box */}
-            <AboutSection />
+              {/* My Journey Section with Active TIU CSE Radar State */}
+              <JourneySection />
 
-            <SectionDivider />
+              {/* Projects Section with 2 Builds, Images & Editable Demo Copy */}
+              <ProjectsSection />
 
-            {/* My Journey Section with Active TIU CSE Radar State */}
-            <JourneySection />
+              {/* Technical Skills Section in Liquid Flux Box with Logos */}
+              <SkillsSection />
 
-            <SectionDivider />
+              {/* Achievements Section with Balanced 3-Item Layout & Visuals */}
+              <AchievementsSection />
 
-            {/* Projects Section with 2 Builds, Images & Editable Demo Copy */}
-            <ProjectsSection />
+              {/* Certifications Preview Section with "View All" Button */}
+              <CertificationsSection onViewAllCertifications={openCertificationsView} />
 
-            <SectionDivider />
-
-            {/* Technical Skills Section in Liquid Flux Box with Logos */}
-            <SkillsSection />
-
-            <SectionDivider />
-
-            {/* Achievements Section with Balanced 3-Item Layout & Visuals */}
-            <AchievementsSection />
-
-            <SectionDivider />
-
-            {/* Certifications Preview Section with "View All" Button */}
-            <CertificationsSection onViewAllCertifications={openCertificationsView} />
-
-            {/* "Let's Build Something" Section with Direct Channels & Message Box */}
-            <ContactSection />
-          </>
-        ) : (
-          /* Dedicated Certifications Page View */
-          <CertificationsPage onBack={backToPortfolioFromCertifications} />
-        )}
+              {/* "Let's Build Something" Section with Direct Channels & Message Box */}
+              <ContactSection />
+            </motion.div>
+          ) : (
+            /* Dedicated Certifications Page View */
+            <motion.div
+              key="certifications"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -16 }}
+              transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+            >
+              <CertificationsPage onBack={backToPortfolioFromCertifications} />
+            </motion.div>
+          )}
+        </AnimatePresence>
       </main>
+
+      {/* Floating Scroll to Top Button with SVG Circular Progress */}
+      <ScrollToTopButton />
 
       {/* Nothing OS Minimalist Footer */}
       <Footer />
