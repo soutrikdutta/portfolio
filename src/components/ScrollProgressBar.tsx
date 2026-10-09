@@ -1,40 +1,25 @@
-import React, { useEffect, useRef } from 'react';
+import React from 'react';
+import { motion, useScroll, useSpring } from 'motion/react';
 
 export const ScrollProgressBar: React.FC = () => {
-  const barRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    let ticking = false;
-
-    const updateBar = () => {
-      const totalHeight = document.documentElement.scrollHeight - window.innerHeight;
-      if (barRef.current && totalHeight > 0) {
-        const progress = Math.min(1, Math.max(0, window.scrollY / totalHeight));
-        barRef.current.style.transform = `scaleX(${progress})`;
-      }
-      ticking = false;
-    };
-
-    const handleScroll = () => {
-      if (!ticking) {
-        ticking = true;
-        window.requestAnimationFrame(updateBar);
-      }
-    };
-
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    updateBar();
-
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  const { scrollYProgress } = useScroll();
+  // Buttery-smooth spring interpolation for real-time scroll depth
+  const scaleX = useSpring(scrollYProgress, {
+    stiffness: 260,
+    damping: 30,
+    restDelta: 0.0005,
+  });
 
   return (
-    <div className="fixed top-0 left-0 right-0 h-[2px] z-50 pointer-events-none bg-transparent">
-      <div
-        ref={barRef}
-        className="h-full w-full bg-gradient-to-r from-[#00b848]/40 via-[#00b848] to-[#00b848] shadow-[0_0_8px_#00b848] origin-left transform-gpu will-change-transform"
-        style={{ transform: 'scaleX(0)' }}
-      />
+    <div className="fixed top-0 left-0 right-0 h-[2.5px] z-50 pointer-events-none bg-transparent overflow-hidden">
+      {/* Dynamic Luminous Laser Progress Bar */}
+      <motion.div
+        className="h-full w-full bg-gradient-to-r from-[#00b848]/70 via-[#00ff66] to-[#06b6d4] shadow-[0_0_12px_rgba(0,255,102,0.7),0_0_24px_rgba(6,182,212,0.4)] origin-left transform-gpu will-change-transform relative"
+        style={{ scaleX }}
+      >
+        {/* Intense Photon Glow Head at the Leading Edge */}
+        <div className="absolute right-0 top-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-white blur-[2px] shadow-[0_0_16px_#00ff66,0_0_25px_#06b6d4]" />
+      </motion.div>
     </div>
   );
 };
