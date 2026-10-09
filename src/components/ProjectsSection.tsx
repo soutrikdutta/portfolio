@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
+import React, { useState, useEffect, useRef } from 'react';
+import { motion, AnimatePresence, useScroll, useSpring, useTransform } from 'motion/react';
 import { Github, ExternalLink, X, ArrowUpRight } from 'lucide-react';
 import { FluxCard } from './FluxCard';
 import { GlyphDecryptText } from './GlyphDecryptText';
@@ -8,6 +8,7 @@ import { ProjectImageGallery } from './ProjectImageGallery';
 import { FullscreenLightbox } from './FullscreenLightbox';
 import { openLiveDemoNotice } from './LiveDemoUnavailableModal';
 import { PORTFOLIO_DATA, Project } from '../data/portfolioData';
+import { useScrollDirection } from '../hooks/useScrollAnimation';
 
 export const ProjectsSection: React.FC = () => {
   const [projects] = useState<Project[]>(PORTFOLIO_DATA.projects);
@@ -19,6 +20,20 @@ export const ProjectsSection: React.FC = () => {
     initialIndex: number;
     liveUrl?: string;
   } | null>(null);
+
+  const sectionRef = useRef<HTMLDivElement>(null);
+  const direction = useScrollDirection();
+
+  // Continuous bi-directional scroll parallax
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ['start end', 'end start'],
+  });
+  const smoothProgress = useSpring(scrollYProgress, { stiffness: 180, damping: 26 });
+  const card1Float = useTransform(smoothProgress, [0, 1], [-14, 14]);
+  const card2Float = useTransform(smoothProgress, [0, 1], [14, -14]);
+
+  const offset = direction === 'down' ? 36 : -36;
 
   // Safely ensure body scroll is unlocked whenever modals close
   useEffect(() => {
@@ -40,13 +55,13 @@ export const ProjectsSection: React.FC = () => {
   }, [selectedProject]);
 
   return (
-    <section id="projects" className="py-20 px-6 relative">
+    <section ref={sectionRef} id="projects" className="py-20 px-6 relative">
       <div className="max-w-6xl mx-auto">
         {/* Section Header */}
         <motion.div
-          initial={{ opacity: 0, y: 24 }}
+          initial={{ opacity: 0, y: offset }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: false, amount: 0.15 }}
+          viewport={{ once: false, amount: 0.1 }}
           transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
           className="mb-12"
         >
@@ -66,16 +81,17 @@ export const ProjectsSection: React.FC = () => {
           </div>
         </motion.div>
 
-        {/* 2 Featured Projects Grid */}
+        {/* 2 Featured Projects Grid with Bi-directional Float & Directional Reveal */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {projects.map((project, idx) => (
             <motion.div
               key={project.id}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              whileHover={{ y: -5, transition: { duration: 0.2, ease: 'easeOut' } }}
-              viewport={{ once: false, amount: 0.08 }}
-              transition={{ duration: 0.5, delay: idx * 0.08, ease: [0.22, 1, 0.36, 1] }}
+              style={{ y: idx === 0 ? card1Float : card2Float }}
+              initial={{ opacity: 0, y: offset, scale: 0.96 }}
+              whileInView={{ opacity: 1, y: 0, scale: 1 }}
+              whileHover={{ y: -6, scale: 1.015, transition: { type: 'spring', stiffness: 300, damping: 20 } }}
+              viewport={{ once: false, amount: 0.1 }}
+              transition={{ duration: 0.65, delay: idx * 0.1, ease: [0.16, 1, 0.3, 1] }}
               className="transform-gpu will-change-transform"
             >
               <FluxCard className="h-full flex flex-col p-4 sm:p-6 group border-white/10 hover:border-white/20 hover:shadow-[0_10px_35px_rgba(0,184,72,0.12)] transition-shadow duration-300">
@@ -155,7 +171,6 @@ export const ProjectsSection: React.FC = () => {
                       onClick={() => openLiveDemoNotice(project.title)}
                       className="flex-1 sm:flex-initial justify-center relative overflow-hidden px-3.5 sm:px-4 py-2 rounded-full bg-[#00b848]/20 hover:bg-[#00b848]/35 text-[#00ff66] hover:text-white border border-[#00b848]/40 hover:border-[#00b848]/80 text-xs flex items-center gap-1.5 sm:gap-2 transition-all duration-300 font-semibold shadow-[0_0_15px_rgba(0,184,72,0.15)] hover:shadow-[0_0_25px_rgba(0,184,72,0.4)] hover:scale-105 active:scale-95 group/live font-space whitespace-nowrap cursor-pointer"
                     >
-                      <span className="pointer-events-none absolute inset-0 w-1/2 h-full bg-gradient-to-r from-transparent via-[#00ff66]/20 to-transparent animate-shimmer-sweep" />
                       <ExternalLink className="w-3.5 h-3.5 relative z-10 group-hover/live:translate-x-0.5 group-hover/live:-translate-y-0.5 transition-transform" />
                       <span className="relative z-10">Live Demo</span>
                     </button>
@@ -209,7 +224,7 @@ export const ProjectsSection: React.FC = () => {
                     aspectClass="aspect-[16/10] sm:aspect-[16/9]"
                     onOpenLightbox={(idx) =>
                       setFullscreenData({
-                        images: selectedProject.images,
+                        images: selectedProject.images || [],
                         captions: selectedProject.imageCaptions,
                         title: selectedProject.title,
                         initialIndex: idx,
@@ -260,7 +275,6 @@ export const ProjectsSection: React.FC = () => {
                     }}
                     className="relative overflow-hidden px-5 py-2.5 rounded-full bg-[#00b848]/20 hover:bg-[#00b848]/35 text-[#00ff66] hover:text-white border border-[#00b848]/40 hover:border-[#00b848]/80 text-xs flex items-center gap-2 transition-all duration-300 font-semibold shadow-[0_0_20px_rgba(0,184,72,0.25)] hover:scale-105 active:scale-95 font-dot tracking-wide cursor-pointer"
                   >
-                    <span className="pointer-events-none absolute inset-0 w-1/2 h-full bg-gradient-to-r from-transparent via-[#00ff66]/20 to-transparent animate-shimmer-sweep" />
                     <ExternalLink className="w-4 h-4 relative z-10" />
                     <span className="relative z-10">Open Live Demo</span>
                   </button>

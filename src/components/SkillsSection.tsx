@@ -1,9 +1,10 @@
-import React from 'react';
-import { motion } from 'motion/react';
+import React, { useRef } from 'react';
+import { motion, useScroll, useSpring, useTransform } from 'motion/react';
 import { Code, Cpu, Database } from 'lucide-react';
 import { FluxCard } from './FluxCard';
 import { GlyphDecryptText } from './GlyphDecryptText';
 import { PORTFOLIO_DATA } from '../data/portfolioData';
+import { useScrollDirection } from '../hooks/useScrollAnimation';
 
 // Authentic Vibrant SVG Logos for Compact Skills
 const SkillIcon: React.FC<{ type: string }> = ({ type }) => {
@@ -84,15 +85,27 @@ const SkillIcon: React.FC<{ type: string }> = ({ type }) => {
 
 export const SkillsSection: React.FC = () => {
   const { compactSkills } = PORTFOLIO_DATA;
+  const sectionRef = useRef<HTMLDivElement>(null);
+  const direction = useScrollDirection();
+
+  // Continuous bi-directional scroll parallax
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ['start end', 'end start'],
+  });
+  const smoothProgress = useSpring(scrollYProgress, { stiffness: 180, damping: 26 });
+  const boxFloat = useTransform(smoothProgress, [0, 1], [-12, 12]);
+
+  const offset = direction === 'down' ? 28 : -28;
 
   return (
-    <section id="skills" className="py-20 px-6 relative">
+    <section ref={sectionRef} id="skills" className="py-20 px-6 relative">
       <div className="max-w-6xl mx-auto">
         {/* Section Header */}
         <motion.div
-          initial={{ opacity: 0, y: 24 }}
+          initial={{ opacity: 0, y: offset }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: false, amount: 0.15 }}
+          viewport={{ once: false, amount: 0.1 }}
           transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
           className="mb-10"
         >
@@ -112,23 +125,32 @@ export const SkillsSection: React.FC = () => {
           </div>
         </motion.div>
 
-        {/* Box containing small skills with authentic colored logos */}
+        {/* Box containing small skills with authentic colored logos and bi-directional float */}
         <motion.div
-          initial={{ opacity: 0, y: 28 }}
-          whileInView={{ opacity: 1, y: 0 }}
+          style={{ y: boxFloat }}
+          initial={{ opacity: 0, y: offset, scale: 0.98 }}
+          whileInView={{ opacity: 1, y: 0, scale: 1 }}
           viewport={{ once: false, amount: 0.1 }}
-          transition={{ duration: 0.6, delay: 0.05, ease: [0.16, 1, 0.3, 1] }}
+          transition={{ duration: 0.65, delay: 0.05, ease: [0.16, 1, 0.3, 1] }}
           className="transform-gpu will-change-transform"
         >
           <FluxCard className="p-6 sm:p-8 border-white/10 hover:border-white/20 relative overflow-hidden">
-            {/* Subtle animated light sweep */}
-            <div className="pointer-events-none absolute inset-0 w-1/3 bg-gradient-to-r from-transparent via-white/[0.03] to-transparent animate-shimmer-sweep" />
-
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 relative z-10">
+            <motion.div
+              variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.045, delayChildren: 0.08 } } }}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: false, amount: 0.12 }}
+              className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 relative z-10"
+            >
               {compactSkills.map((skill) => (
-                <div
+                <motion.div
                   key={skill.name}
-                  className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl bg-zinc-950/70 hover:bg-zinc-900/90 border border-white/5 hover:border-[#00ff66]/40 hover:shadow-[0_0_20px_rgba(0,255,102,0.12)] hover:-translate-y-1 hover:scale-105 transition-all duration-200 ease-out group cursor-default transform-gpu"
+                  variants={{
+                    hidden: { opacity: 0, scale: 0.8, y: 16 },
+                    visible: { opacity: 1, scale: 1, y: 0, transition: { type: 'spring', stiffness: 320, damping: 22 } },
+                  }}
+                  whileHover={{ y: -4, scale: 1.07, transition: { type: 'spring', stiffness: 400, damping: 20 } }}
+                  className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl bg-zinc-950/70 hover:bg-zinc-900/90 border border-white/5 hover:border-[#00ff66]/40 hover:shadow-[0_0_20px_rgba(0,255,102,0.12)] transition-colors duration-200 group cursor-default transform-gpu"
                 >
                   <div className="p-1 rounded-lg bg-zinc-900/90 border border-white/5 group-hover:border-white/20 transition-colors shrink-0">
                     <SkillIcon type={skill.icon} />
@@ -136,9 +158,9 @@ export const SkillsSection: React.FC = () => {
                   <span className="text-xs font-mono text-zinc-200 group-hover:text-white transition-colors truncate">
                     {skill.shortName}
                   </span>
-                </div>
+                </motion.div>
               ))}
-            </div>
+            </motion.div>
           </FluxCard>
         </motion.div>
       </div>

@@ -218,7 +218,6 @@ export const LiveDemoUnavailableModal: React.FC<LiveDemoUnavailableModalProps> =
                 onClick={handleContactClick}
                 className="relative overflow-hidden px-5 py-2.5 rounded-full bg-[#00b848] hover:bg-[#00c853] text-black text-xs font-bold flex items-center justify-center gap-2 transition-all duration-200 shadow-[0_0_20px_rgba(0,184,72,0.35)] hover:scale-105 active:scale-95 font-space cursor-pointer"
               >
-                <span className="pointer-events-none absolute inset-0 w-1/2 h-full bg-gradient-to-r from-transparent via-white/30 to-transparent animate-shimmer-sweep" />
                 <Mail className="w-3.5 h-3.5 relative z-10" />
                 <span className="relative z-10">Contact Me Below</span>
                 <ArrowDown className="w-3.5 h-3.5 relative z-10 animate-bounce" />

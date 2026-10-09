@@ -1,16 +1,31 @@
-import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
-import { X, CheckCircle2, ExternalLink } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { motion, AnimatePresence, useScroll, useSpring, useTransform } from 'motion/react';
+import { X, CheckCircle2 } from 'lucide-react';
 import { FluxCard } from './FluxCard';
 import { GlyphDecryptText } from './GlyphDecryptText';
 import { AchievementVisual } from './AchievementVisual';
 import { ProjectImageGallery } from './ProjectImageGallery';
 import { PORTFOLIO_DATA, Achievement } from '../data/portfolioData';
+import { useScrollDirection } from '../hooks/useScrollAnimation';
 
 export const AchievementsSection: React.FC = () => {
   const { achievements } = PORTFOLIO_DATA;
   const [selectedAchievement, setSelectedAchievement] = useState<Achievement | null>(null);
   const [selectedSlideIndex, setSelectedSlideIndex] = useState<number>(0);
+
+  const sectionRef = useRef<HTMLDivElement>(null);
+  const direction = useScrollDirection();
+
+  // Continuous bi-directional scroll parallax
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ['start end', 'end start'],
+  });
+  const smoothProgress = useSpring(scrollYProgress, { stiffness: 180, damping: 26 });
+  const card1Float = useTransform(smoothProgress, [0, 1], [-12, 12]);
+  const card3Float = useTransform(smoothProgress, [0, 1], [12, -12]);
+
+  const offset = direction === 'down' ? 32 : -32;
 
   // Safely ensure body scroll is unlocked whenever modal closes
   useEffect(() => {
@@ -32,13 +47,13 @@ export const AchievementsSection: React.FC = () => {
   }, [selectedAchievement]);
 
   return (
-    <section id="achievements" className="py-20 px-6 relative">
+    <section ref={sectionRef} id="achievements" className="py-20 px-6 relative">
       <div className="max-w-6xl mx-auto">
         {/* Section Header */}
         <motion.div
-          initial={{ opacity: 0, y: 24 }}
+          initial={{ opacity: 0, y: offset }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: false, amount: 0.15 }}
+          viewport={{ once: false, amount: 0.1 }}
           transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
           className="mb-12"
         >
@@ -58,16 +73,17 @@ export const AchievementsSection: React.FC = () => {
           </div>
         </motion.div>
 
-        {/* Balanced 3-Card Grid */}
+        {/* Balanced 3-Card Grid with Bi-directional Float */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch">
           {achievements.map((item, idx) => (
             <motion.div
               key={item.id}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              whileHover={{ y: -5, transition: { duration: 0.2, ease: 'easeOut' } }}
-              viewport={{ once: false, amount: 0.08 }}
-              transition={{ duration: 0.5, delay: idx * 0.08, ease: [0.22, 1, 0.36, 1] }}
+              style={{ y: idx === 0 ? card1Float : idx === 2 ? card3Float : undefined }}
+              initial={{ opacity: 0, y: offset, scale: 0.96 }}
+              whileInView={{ opacity: 1, y: 0, scale: 1 }}
+              whileHover={{ y: -6, scale: 1.02, transition: { type: 'spring', stiffness: 300, damping: 20 } }}
+              viewport={{ once: false, amount: 0.1 }}
+              transition={{ duration: 0.65, delay: idx * 0.1, ease: [0.16, 1, 0.3, 1] }}
               className="flex transform-gpu will-change-transform"
             >
               <FluxCard
