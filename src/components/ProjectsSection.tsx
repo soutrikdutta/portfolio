@@ -81,20 +81,20 @@ export const ProjectsSection: React.FC = () => {
           </div>
         </motion.div>
 
-        {/* 2 Featured Projects Grid with Bi-directional Float & Directional Reveal */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        {/* Featured Projects Grid with Bi-directional Float & Directional Reveal */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-7">
           {projects.map((project, idx) => (
             <motion.div
               key={project.id}
-              style={{ y: idx === 0 ? card1Float : card2Float }}
+              style={{ y: idx % 2 === 0 ? card1Float : card2Float }}
               initial={{ opacity: 0, y: offset, scale: 0.96 }}
               whileInView={{ opacity: 1, y: 0, scale: 1 }}
               whileHover={{ y: -6, scale: 1.015, transition: { type: 'spring', stiffness: 300, damping: 20 } }}
               viewport={{ once: false, amount: 0.1 }}
               transition={{ duration: 0.65, delay: idx * 0.1, ease: [0.16, 1, 0.3, 1] }}
-              className="transform-gpu will-change-transform"
+              className="transform-gpu will-change-transform flex flex-col h-full"
             >
-              <FluxCard className="h-full flex flex-col p-4 sm:p-6 group border-white/10 hover:border-white/20 hover:shadow-[0_10px_35px_rgba(0,184,72,0.12)] transition-shadow duration-300">
+              <FluxCard className="h-full w-full flex flex-col p-4 sm:p-5 group border-white/10 hover:border-white/20 hover:shadow-[0_10px_35px_rgba(0,184,72,0.12)] transition-shadow duration-300">
 
                 {/* Project Visual / Image Gallery */}
                 <div

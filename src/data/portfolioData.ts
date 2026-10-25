@@ -156,6 +156,36 @@ export const PORTFOLIO_DATA = {
         'Confirmed Route & Hopping Sequence with Dining Spots',
         'Real-Time Google Maps Navigation with Live Traffic'
       ]
+    },
+    {
+      id: 'project-3',
+      title: 'Ytify',
+      subtitle: 'Lossless audio streaming & Dolby Atmos spatial audio platform',
+      description: 'Next-gen modern music streaming web and mobile app featuring YouTube-powered lossless acoustics, 3D spatial sound stage separation, and cloud synchronization.',
+      longDescription: 'Ytify delivers a pure, ad-free music streaming experience with over 100M+ songs. Built with a custom Web Audio API spatial audio engine that expands stereo width and acoustic depth, alongside Google authentication, smart playlist curation, and cross-platform PWA support.',
+      tags: ['React', 'TypeScript', 'Tailwind CSS', 'Web Audio API', 'Node.js', 'Vite'],
+      features: [
+        'Dolby Atmos & 3D Spatial Sound Stage acoustic DSP virtualization',
+        'Stream 100M+ tracks with zero commercial audio ads and lossless fidelity',
+        'Interactive artist & genre feed personalization algorithm',
+        'Cross-platform 1-tap install PWA with background playback and offline cache',
+        'Google Cloud sync for user library, liked tracks, and custom playlists'
+      ],
+      liveUrl: 'https://soutrik-ytify.vercel.app',
+      githubUrl: 'https://github.com/soutrikdutta/ytify',
+      imageType: 'workspace',
+      images: [
+        '/projects/ytify/slide-1.png',
+        '/projects/ytify/slide-2.png',
+        '/projects/ytify/slide-3.png',
+        '/projects/ytify/slide-4.png'
+      ],
+      imageCaptions: [
+        'Next-Gen Audio Experience (Landing Hero & Trending Global Hits)',
+        'Settings & Spatial Sound Stage Engine (Developed by Soutrik)',
+        'Personalize Your Feed (Artist & Genre Recommendation Engine)',
+        'Music Library & Playlists (Liked Songs & Playback History)'
+      ]
     }
   ] as Project[],
 

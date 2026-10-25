@@ -89,7 +89,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
       id: 'nav-projects',
       category: 'NAVIGATION',
       title: 'Featured Projects',
-      subtitle: 'SkillGrad & SHARODSHAV architectures',
+      subtitle: 'SkillGrad, SHARODSHAV & Ytify architectures',
       icon: Layers,
       action: () => {
         onNavigateSection('#projects');
@@ -162,6 +162,17 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
       action: () => {
         onClose();
         openLiveDemoNotice('SHARODSHAV');
+      }
+    },
+    {
+      id: 'proj-ytify',
+      category: 'PROJECTS',
+      title: 'Ytify Live Demo',
+      subtitle: 'Lossless audio streaming & Dolby Atmos spatial audio platform',
+      icon: ExternalLink,
+      action: () => {
+        onClose();
+        openLiveDemoNotice('Ytify');
       }
     },
 
