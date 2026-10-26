@@ -5,6 +5,7 @@ import { Menu, X, ArrowUpRight } from 'lucide-react';
 interface TopBarProps {
   currentView: 'home' | 'certifications';
   onNavigate: (view: 'home' | 'certifications') => void;
+  onScrollToSection?: (sectionId: string) => void;
   onOpenCommandPalette?: () => void;
 }
 
@@ -26,6 +27,7 @@ const NAV_ITEMS: NavItem[] = [
 export const TopBar: React.FC<TopBarProps> = ({
   currentView,
   onNavigate,
+  onScrollToSection,
 }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeSection, setActiveSection] = useState<string | null>(null);
@@ -85,26 +87,28 @@ export const TopBar: React.FC<TopBarProps> = ({
     const lenis = (window as unknown as { __lenis?: { scrollTo: (target: string | HTMLElement | number, opts: { offset?: number; duration?: number }) => void } }).__lenis;
 
     if (id === 'certifications' && currentView === 'certifications') {
-      if (lenis) lenis.scrollTo(0, { duration: 1.2 });
-      else window.scrollTo({ top: 0, behavior: 'smooth' });
+      if (onScrollToSection) {
+        onScrollToSection('certifications');
+      } else {
+        if (lenis) lenis.scrollTo(0, { duration: 1.2 });
+        else window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
       return;
     }
 
     if (currentView !== 'home') {
-      onNavigate('home');
-      setTimeout(() => {
-        const el = document.querySelector(href) as HTMLElement | null;
-        if (el) {
-          if (lenis) lenis.scrollTo(el, { offset: -70, duration: 1.2 });
-          else el.scrollIntoView({ behavior: 'smooth' });
-        }
-      }, 100);
-    } else {
-      const el = document.querySelector(href) as HTMLElement | null;
-      if (el) {
-        if (lenis) lenis.scrollTo(el, { offset: -70, duration: 1.2 });
-        else el.scrollIntoView({ behavior: 'smooth' });
+      if (onScrollToSection) {
+        onScrollToSection(id);
+      } else {
+        onNavigate('home');
       }
+      return;
+    }
+
+    const el = document.querySelector(href) as HTMLElement | null;
+    if (el) {
+      if (lenis) lenis.scrollTo(el, { offset: -70, duration: 1.2 });
+      else el.scrollIntoView({ behavior: 'smooth' });
     }
   };
 

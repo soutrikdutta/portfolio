@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useLayoutEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import Lenis from 'lenis';
 import 'lenis/dist/lenis.css';
@@ -21,14 +21,98 @@ import { CommandPalette } from './components/CommandPalette';
 import { LiveDemoUnavailableModal } from './components/LiveDemoUnavailableModal';
 import { ScrollToTopButton } from './components/ScrollToTopButton';
 
+interface ScrollRestorerProps {
+  returnScrollPosRef: React.MutableRefObject<number | null>;
+  pendingSectionRef: React.MutableRefObject<string | null>;
+}
+
+const ScrollRestorer: React.FC<ScrollRestorerProps> = ({
+  returnScrollPosRef,
+  pendingSectionRef,
+}) => {
+  useLayoutEffect(() => {
+    const pending = pendingSectionRef.current;
+    let saved = returnScrollPosRef.current;
+    if (saved === null) {
+      try {
+        const stored = sessionStorage.getItem('portfolio_return_scroll');
+        if (stored) saved = parseFloat(stored);
+      } catch (_) {}
+    }
+
+    pendingSectionRef.current = null;
+    returnScrollPosRef.current = null;
+    try {
+      sessionStorage.removeItem('portfolio_return_scroll');
+    } catch (_) {}
+
+    const lenis = (window as unknown as { __lenis?: Lenis }).__lenis;
+
+    // Case 1: Specific named section was requested (e.g. from TopBar while in certifications)
+    if (pending) {
+      const el = document.getElementById(pending);
+      if (el) {
+        if (lenis) {
+          lenis.resize();
+          lenis.scrollTo(el, { offset: -70, duration: 1.2 });
+        } else {
+          el.scrollIntoView({ behavior: 'smooth' });
+        }
+      }
+      return;
+    }
+
+    // Case 2: Returning from certifications view - restore EXACT saved scroll position
+    if (saved !== null) {
+      let target = saved;
+      if (target <= 0) {
+        const certsEl = document.getElementById('certifications');
+        if (certsEl) {
+          target = certsEl.getBoundingClientRect().top + window.scrollY - 70;
+        }
+      }
+
+      const applyScroll = () => {
+        window.scrollTo({ top: target, behavior: 'instant' });
+        if (lenis) {
+          lenis.resize();
+          lenis.scrollTo(target, { immediate: true });
+        }
+      };
+
+      // 1. Immediately before browser paint
+      applyScroll();
+
+      // 2. Next animation frame to ensure layout stability
+      const raf = requestAnimationFrame(applyScroll);
+      const t1 = setTimeout(applyScroll, 40);
+      const t2 = setTimeout(applyScroll, 120);
+
+      return () => {
+        cancelAnimationFrame(raf);
+        clearTimeout(t1);
+        clearTimeout(t2);
+      };
+    }
+  }, []);
+
+  return null;
+};
+
 export default function App() {
   const [currentView, setCurrentView] = useState<'home' | 'certifications'>('home');
   const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
+  const returnScrollPosRef = useRef<number | null>(null);
+  const pendingSectionRef = useRef<string | null>(null);
 
   // Initialize buttery-smooth momentum scrolling with Lenis
   useEffect(() => {
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
       return;
+    }
+
+    if ('scrollRestoration' in window.history) {
+      window.history.scrollRestoration = 'manual';
     }
 
     const lenis = new Lenis({
@@ -73,17 +157,8 @@ export default function App() {
     const lenis = (window as unknown as { __lenis?: Lenis }).__lenis;
 
     if (currentView !== 'home') {
+      pendingSectionRef.current = sectionId;
       setCurrentView('home');
-      setTimeout(() => {
-        const el = document.getElementById(sectionId);
-        if (el) {
-          if (lenis) {
-            lenis.scrollTo(el, { offset: -70, duration: 1.2 });
-          } else {
-            el.scrollIntoView({ behavior: 'smooth' });
-          }
-        }
-      }, 100);
     } else {
       const el = document.getElementById(sectionId);
       if (el) {
@@ -97,13 +172,25 @@ export default function App() {
   };
 
   const openCertificationsView = () => {
-    try {
-      window.history.pushState({ view: 'certifications' }, '', '#all-certifications');
-    } catch (_) {}
-    setCurrentView('certifications');
     const lenis = (window as unknown as { __lenis?: Lenis }).__lenis;
+    const currentScroll = lenis
+      ? lenis.scroll
+      : (window.scrollY || window.pageYOffset || document.documentElement.scrollTop || 0);
+
+    returnScrollPosRef.current = currentScroll;
+    try {
+      sessionStorage.setItem('portfolio_return_scroll', currentScroll.toString());
+      window.history.pushState(
+        { view: 'certifications', returnScroll: currentScroll },
+        '',
+        '#all-certifications'
+      );
+    } catch (_) {}
+
+    setCurrentView('certifications');
+
     if (lenis) {
-      lenis.scrollTo(0, { duration: 0.1 });
+      lenis.scrollTo(0, { immediate: true });
     } else {
       window.scrollTo({ top: 0, behavior: 'instant' });
     }
@@ -111,46 +198,27 @@ export default function App() {
 
   const backToPortfolioFromCertifications = () => {
     document.body.style.overflow = '';
-    setCurrentView('home');
-    try {
-      if (window.location.hash === '#all-certifications') {
-        window.history.replaceState({ view: 'home' }, '', '#certifications');
-      }
-    } catch (_) {}
-
-    // Scroll back to the Certifications section on the home page with silky easing
-    setTimeout(() => {
-      document.body.style.overflow = '';
-      const el = document.getElementById('certifications');
-      const lenis = (window as unknown as { __lenis?: Lenis }).__lenis;
-      if (el) {
-        if (lenis) {
-          lenis.scrollTo(el, { offset: -70, duration: 1 });
-        } else {
-          el.scrollIntoView({ behavior: 'auto', block: 'start' });
+    if (window.history.state?.view === 'certifications') {
+      window.history.back();
+    } else {
+      try {
+        if (window.location.hash === '#all-certifications') {
+          window.history.replaceState({ view: 'home' }, '', '#certifications');
         }
-      }
-    }, 40);
+      } catch (_) {}
+    }
+    setCurrentView('home');
   };
 
-  // Support browser native back button to return to certifications section
+  // Support browser native back button to return exactly from where we moved
   useEffect(() => {
     const handlePopState = (e: PopStateEvent) => {
       if (currentView === 'certifications' && (!e.state || e.state.view !== 'certifications')) {
         document.body.style.overflow = '';
+        if (returnScrollPosRef.current === null && e.state?.returnScroll != null) {
+          returnScrollPosRef.current = Number(e.state.returnScroll);
+        }
         setCurrentView('home');
-        setTimeout(() => {
-          document.body.style.overflow = '';
-          const el = document.getElementById('certifications');
-          const lenis = (window as unknown as { __lenis?: Lenis }).__lenis;
-          if (el) {
-            if (lenis) {
-              lenis.scrollTo(el, { offset: -70, duration: 1 });
-            } else {
-              el.scrollIntoView({ behavior: 'auto', block: 'start' });
-            }
-          }
-        }, 40);
       }
     };
 
@@ -199,6 +267,7 @@ export default function App() {
             setCurrentView(view);
           }
         }}
+        onScrollToSection={scrollToSection}
         onOpenCommandPalette={() => setIsCommandPaletteOpen(true)}
       />
 
@@ -219,11 +288,15 @@ export default function App() {
           {currentView === 'home' ? (
             <motion.div
               key="home"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -8 }}
-              transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
             >
+              <ScrollRestorer
+                returnScrollPosRef={returnScrollPosRef}
+                pendingSectionRef={pendingSectionRef}
+              />
               {/* Hero Section with Jumbled Pixel Decrypt Animation & Channels */}
               <HeroSection
                 onScrollToProjects={() => scrollToSection('projects')}
