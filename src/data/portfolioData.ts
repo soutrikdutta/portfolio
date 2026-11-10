@@ -186,6 +186,79 @@ export const PORTFOLIO_DATA = {
         'Personalize Your Feed (Artist & Genre Recommendation Engine)',
         'Music Library & Playlists (Liked Songs & Playback History)'
       ]
+    },
+    {
+      id: 'project-4',
+      title: 'CareerConnects',
+      subtitle: 'Verified student credentials, internships & mentorship ecosystem',
+      description: 'Comprehensive student opportunity platform bridging verified student developers, 1-on-1 industry mentors, paid internships, and startup incubators.',
+      longDescription: 'CareerConnects (ProwessPulse) features Google and Firebase authentication, OCR-based academic college ID verification, curated engineering internships, 1-on-1 mentorship bookings with Staff & Principal engineers, real-time founder messaging in the Startup Hub, and official certificate issuance.',
+      tags: ['React', 'Firebase Auth', 'Cloud Firestore', 'Tailwind CSS', 'Vite'],
+      features: [
+        'OCR-assisted verified student college ID credentials with trust badges',
+        'Curated paid internships matched to student profiles (Google, Microsoft, etc.)',
+        '1-on-1 industry mentorship booking with system design & resume critique',
+        'Startup Hub with founder networking, team recruitment, and group chat',
+        'Employer & partner studio for role postings and official certificate issuance'
+      ],
+      liveUrl: 'https://soutrik-careconnects.vercel.app',
+      githubUrl: 'https://github.com/soutrikdutta/portfolio',
+      imageType: 'workspace',
+      images: [
+        '/projects/careerconnects/slide-1.jpg',
+        '/projects/careerconnects/slide-2.png',
+        '/projects/careerconnects/slide-3.png',
+        '/projects/careerconnects/slide-4.jpg',
+        '/projects/careerconnects/slide-5.png',
+        '/projects/careerconnects/slide-6.png',
+        '/projects/careerconnects/slide-7.png',
+        '/projects/careerconnects/slide-8.jpg'
+      ],
+      imageCaptions: [
+        'Where Should We Start? — Google Authentication & Enterprise Partner Portal',
+        'Student Workspace Dashboard — Vetted Mentors, Applications & 100% Profile Strength',
+        'Internship Discovery — Paid, Vetted Software Engineering Roles with Profile Match',
+        '1-on-1 Mentorship Booking — System Design, Career Architecture & Resume Critiques',
+        'Startup Hub — Founder Chat, Co-founder Discovery & Live Network Messaging',
+        'Career & Contract Opportunities — Senior Engineering Roles & Enterprise Contracts',
+        'Mentor Hub Workspace — Student Guidance Requests & Video Meeting Controls',
+        'Partner & Talent Studio — Participant Application Review & Official Certificate Studio'
+      ]
+    },
+    {
+      id: 'project-5',
+      title: 'Trusify',
+      subtitle: 'AI forensic phishing protection, URL risk inspector & threat intelligence',
+      description: 'Automated cybersecurity inspection engine that scans suspicious links and screenshots across 90+ threat databases, unmasking phishing attacks and calculating instant trust scores.',
+      longDescription: 'Trusify delivers zero-trust forensic protection against phishing, brand spoofing, and malicious downloads. Features Google Gemini multimodal vision OCR for screenshot inspection, VirusTotal v3 and Google Safe Browsing v4 threat intelligence, raw TLS/SSL socket certificate audits, RDAP domain age verification, and privacy-preserving guest mode.',
+      tags: ['React', 'Google Gemini AI', 'Node.js', 'VirusTotal API', 'Tailwind CSS', 'Vite'],
+      features: [
+        'Multimodal Gemini AI vision OCR for screenshot credential trap detection',
+        'Cross-vendor consensus across 90+ security threat intelligence engines',
+        'Raw TLS/SSL socket handshake auditing and cryptographic authority verification',
+        'Calibrated 0–100 Trust Score with plain-language risk breakdowns',
+        'Live Community Threat Feed with crowdsourced phishing alerts and campaigns',
+        'Zero-tracking client privacy with local device audit history and Google sync'
+      ],
+      liveUrl: 'https://trusify.vercel.app',
+      githubUrl: 'https://github.com/soutrikdutta/trusify',
+      imageType: 'workspace',
+      images: [
+        '/projects/trusify/slide-1.png',
+        '/projects/trusify/slide-2.png',
+        '/projects/trusify/slide-3.jpg',
+        '/projects/trusify/slide-4.jpg',
+        '/projects/trusify/slide-5.jpg',
+        '/projects/trusify/slide-6.jpg'
+      ],
+      imageCaptions: [
+        'Is That Link Really Safe to Click? — Trusify Hero & AI Forensic Verification Portal',
+        'Live Forensic Inspection Engine — Auditing SSL/TLS Certificates & 90+ Threat Databases',
+        'Forensic Scam & Phishing Report — Calibrated Trust Gauge (70/100 Suspicious)',
+        'Screenshot Attack Analyzer — Multimodal Vision Detecting Brand Impersonation (30/100 Critical)',
+        'Community Threat Intelligence Feed — Live Spoofed Domains & Global Active Campaigns',
+        'Local Device Audit Trail & Multi-Layer Forensic Defense Engine Matrix'
+      ]
     }
   ] as Project[],
 

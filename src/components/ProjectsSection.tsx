@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence, useScroll, useSpring, useTransform } from 'motion/react';
 import { Github, ExternalLink, X, ArrowUpRight } from 'lucide-react';
 import { FluxCard } from './FluxCard';
-import { GlyphDecryptText } from './GlyphDecryptText';
+import { SectionHeader } from './SectionHeader';
 import { ProjectMockupVisual } from './ProjectMockupVisual';
 import { ProjectImageGallery } from './ProjectImageGallery';
 import { FullscreenLightbox } from './FullscreenLightbox';
@@ -63,26 +63,14 @@ export const ProjectsSection: React.FC = () => {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: false, amount: 0.1 }}
           transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-          className="mb-12"
         >
-          <h2 className="text-3xl sm:text-4xl font-bold tracking-wider text-white font-dot">
-            <GlyphDecryptText text="PROJECTS" speed={28} />
-          </h2>
-          <div className="mt-2.5 flex items-center gap-2">
-            <motion.div
-              initial={{ scaleX: 0 }}
-              whileInView={{ scaleX: 1 }}
-              viewport={{ once: false }}
-              transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-              style={{ originX: 0 }}
-              className="h-[2px] w-24 bg-gradient-to-r from-[#00ff66] to-transparent rounded-full"
-            />
-            <span className="w-1.5 h-1.5 rounded-full bg-[#00ff66] animate-pulse" />
-          </div>
+          <SectionHeader
+            title="PROJECTS"
+          />
         </motion.div>
 
         {/* Featured Projects Grid with Bi-directional Float & Directional Reveal */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-7">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-7">
           {projects.map((project, idx) => (
             <motion.div
               key={project.id}

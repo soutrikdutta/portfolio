@@ -175,6 +175,28 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
         openLiveDemoNotice('Ytify');
       }
     },
+    {
+      id: 'proj-careerconnects',
+      category: 'PROJECTS',
+      title: 'CareerConnects Live Demo',
+      subtitle: 'Verified student credentials, internships & mentorship ecosystem',
+      icon: ExternalLink,
+      action: () => {
+        onClose();
+        openLiveDemoNotice('CareerConnects');
+      }
+    },
+    {
+      id: 'proj-trusify',
+      category: 'PROJECTS',
+      title: 'Trusify Live Demo',
+      subtitle: 'AI forensic phishing protection, URL risk inspector & threat intelligence',
+      icon: ExternalLink,
+      action: () => {
+        onClose();
+        openLiveDemoNotice('Trusify');
+      }
+    },
 
     // Actions & Contact
     {
