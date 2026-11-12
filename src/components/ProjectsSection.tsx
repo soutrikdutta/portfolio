@@ -24,69 +24,65 @@ export const ProjectsSection: React.FC = () => {
   const sectionRef = useRef<HTMLDivElement>(null);
   const direction = useScrollDirection();
 
-  // Continuous bi-directional scroll parallax
   const { scrollYProgress } = useScroll({
     target: sectionRef,
     offset: ['start end', 'end start'],
   });
   const smoothProgress = useSpring(scrollYProgress, { stiffness: 180, damping: 26 });
-  const card1Float = useTransform(smoothProgress, [0, 1], [-14, 14]);
-  const card2Float = useTransform(smoothProgress, [0, 1], [14, -14]);
+  const card1Float = useTransform(smoothProgress, [0, 1], [-10, 10]);
+  const card2Float = useTransform(smoothProgress, [0, 1], [10, -10]);
 
-  const offset = direction === 'down' ? 36 : -36;
+  const offset = direction === 'down' ? 32 : -32;
 
-  // Safely ensure body scroll is unlocked whenever modals close
   useEffect(() => {
     if (!selectedProject && !fullscreenData) {
       document.body.style.overflow = '';
     }
   }, [selectedProject, fullscreenData]);
 
-  // Escape key handler for selectedProject modal
   useEffect(() => {
     if (!selectedProject) return;
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        setSelectedProject(null);
-      }
+      if (e.key === 'Escape') setSelectedProject(null);
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [selectedProject]);
 
   return (
-    <section ref={sectionRef} id="projects" className="py-20 px-6 relative">
+    <section ref={sectionRef} id="projects" className="py-20 sm:py-28 px-5 sm:px-6 relative">
       <div className="max-w-6xl mx-auto">
-        {/* Section Header */}
         <motion.div
           initial={{ opacity: 0, y: offset }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: false, amount: 0.1 }}
-          transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+          transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
         >
           <SectionHeader
-            title="PROJECTS"
+            tag="PORTFOLIO"
+            title="FEATURED PROJECTS"
+            subtitle="Production web platforms, generative AI systems, and modern developer tools built from the ground up."
           />
         </motion.div>
 
-        {/* Featured Projects Grid with Bi-directional Float & Directional Reveal */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-7">
           {projects.map((project, idx) => (
             <motion.div
               key={project.id}
               style={{ y: idx % 2 === 0 ? card1Float : card2Float }}
-              initial={{ opacity: 0, y: offset, scale: 0.96 }}
+              initial={{ opacity: 0, y: offset, scale: 0.97 }}
               whileInView={{ opacity: 1, y: 0, scale: 1 }}
-              whileHover={{ y: -6, scale: 1.015, transition: { type: 'spring', stiffness: 300, damping: 20 } }}
+              whileHover={{ y: -6, transition: { type: 'spring', stiffness: 300, damping: 24 } }}
               viewport={{ once: false, amount: 0.1 }}
-              transition={{ duration: 0.65, delay: idx * 0.1, ease: [0.16, 1, 0.3, 1] }}
-              className="transform-gpu will-change-transform flex flex-col h-full"
+              transition={{ duration: 0.7, delay: idx * 0.08, ease: [0.16, 1, 0.3, 1] }}
+              className={`transform-gpu will-change-transform flex flex-col h-full ${
+                idx === 4 ? 'md:col-span-2' : ''
+              }`}
             >
-              <FluxCard className="h-full w-full flex flex-col p-4 sm:p-5 group border-white/10 hover:border-white/20 hover:shadow-[0_10px_35px_rgba(0,184,72,0.12)] transition-shadow duration-300">
-
-                {/* Project Visual / Image Gallery */}
+              <FluxCard className="h-full w-full flex flex-col p-4 sm:p-5 group border-white/10 hover:border-[#00f59b]/40 hover:shadow-[0_12px_45px_rgba(0,245,155,0.12)] transition-all duration-300 bg-zinc-950/75">
+                {/* Visual Showcase */}
                 <div
-                  className="mb-5 overflow-hidden rounded-xl border border-white/10 relative"
+                  className="mb-5 overflow-hidden rounded-2xl border border-white/10 relative shadow-inner"
                   onClick={(e) => e.stopPropagation()}
                 >
                   {project.images && project.images.length > 0 ? (
@@ -101,72 +97,80 @@ export const ProjectsSection: React.FC = () => {
                       <ProjectMockupVisual type={project.imageType} title={project.title} />
                       <button
                         onClick={() => setSelectedProject(project)}
-                        className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2 text-xs text-white backdrop-blur-xs cursor-pointer"
+                        className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2 text-xs text-white backdrop-blur-sm cursor-pointer"
                       >
-                        <span>VIEW ARCHITECTURE</span>
-                        <ArrowUpRight className="w-3.5 h-3.5 text-[#00b848]" />
+                        <span>View architecture</span>
+                        <ArrowUpRight className="w-3.5 h-3.5 text-[#00f59b]" />
                       </button>
                     </div>
                   )}
                 </div>
 
-                {/* Project Title & Info */}
-                <div className="mb-2">
-                  <h3 className="text-xl sm:text-2xl font-bold text-white tracking-wider font-dot group-hover:text-zinc-100 transition-colors">
-                    {project.title.toUpperCase()}
-                  </h3>
-                  <p className="text-xs text-zinc-300 tracking-wider mt-0.5 uppercase">
-                    {project.subtitle}
-                  </p>
+                {/* Title row */}
+                <div className="px-1 mb-2.5 flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2 mb-1">
+                      <h3 className="font-dot text-2xl sm:text-[1.75rem] font-bold text-white tracking-tight group-hover:text-[#00f59b] transition-colors leading-tight">
+                        {project.title}
+                      </h3>
+                      {idx === 4 && (
+                        <span className="chip !text-[9px] !text-[#00f59b] !border-[#00f59b]/35 !bg-[#00f59b]/10">
+                          NEW
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-xs font-mono uppercase tracking-[0.06em] text-zinc-400 leading-relaxed">
+                      {project.subtitle}
+                    </p>
+                  </div>
+                  <span className="font-mono text-xs font-bold text-zinc-500 shrink-0 pt-1">
+                    0{idx + 1}
+                  </span>
                 </div>
 
-                {/* Project Description */}
-                <p className="text-sm text-zinc-200 leading-relaxed mb-4 flex-1">
+                <p className="px-1 text-sm text-zinc-300 leading-relaxed mb-5 flex-1">
                   {project.description}
                 </p>
 
-                {/* Tech Stack Metadata */}
-                <div className="flex flex-wrap items-center gap-2 text-xs text-white/90 mb-5 pt-3 border-t border-white/5">
-                  {project.tags.map((tag, i) => (
-                    <React.Fragment key={tag}>
-                      <span className="text-white font-medium">{tag}</span>
-                      {i < project.tags.length - 1 && (
-                        <span className="text-zinc-500" aria-hidden="true">
-                          ·
-                        </span>
-                      )}
-                    </React.Fragment>
+                {/* Tech Stack Chips */}
+                <div className="px-1 flex flex-wrap items-center gap-1.5 mb-5">
+                  {project.tags.map((tag) => (
+                    <span key={tag} className="chip !text-[10px] !text-zinc-200 !border-white/10 !bg-white/[0.04] hover:!border-[#00f59b]/40 hover:!text-white">
+                      {tag}
+                    </span>
                   ))}
                 </div>
 
-                {/* Action Buttons: GitHub Button + Live Demo Button */}
-                <div className="flex items-center justify-between gap-2 pt-3.5 mt-auto border-t border-white/10">
-                  <div className="flex items-center gap-2 flex-1 sm:flex-initial">
-                    {/* GitHub Button */}
+                {/* Actions Bar */}
+                <div className="mt-auto px-1 pt-4 border-t border-white/10 flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2.5">
                     <a
                       href={project.githubUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex-1 sm:flex-initial justify-center px-3.5 sm:px-4 py-2 rounded-full bg-zinc-900/90 hover:bg-zinc-800 text-white border border-white/20 hover:border-white/40 text-xs flex items-center gap-1.5 sm:gap-2 transition-all duration-300 shadow-sm hover:shadow-[0_0_15px_rgba(255,255,255,0.15)] hover:scale-105 active:scale-95 group/btn font-space font-medium whitespace-nowrap"
+                      className="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-full border border-white/15 bg-white/[0.04] hover:bg-white/[0.08] hover:border-white/30 text-xs text-white transition-all font-medium"
                     >
-                      <Github className="w-3.5 h-3.5 text-zinc-300 group-hover/btn:text-white transition-colors" />
+                      <Github className="w-3.5 h-3.5" />
                       <span>GitHub</span>
                     </a>
 
-                    {/* Live Demo Button */}
                     <button
                       type="button"
                       onClick={() => openLiveDemoNotice(project.title)}
-                      className="flex-1 sm:flex-initial justify-center relative overflow-hidden px-3.5 sm:px-4 py-2 rounded-full bg-[#00b848]/20 hover:bg-[#00b848]/35 text-[#00ff66] hover:text-white border border-[#00b848]/40 hover:border-[#00b848]/80 text-xs flex items-center gap-1.5 sm:gap-2 transition-all duration-300 font-semibold shadow-[0_0_15px_rgba(0,184,72,0.15)] hover:shadow-[0_0_25px_rgba(0,184,72,0.4)] hover:scale-105 active:scale-95 group/live font-space whitespace-nowrap cursor-pointer"
+                      className="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-full bg-[#00f59b]/15 text-[#00f59b] border border-[#00f59b]/35 hover:bg-[#00f59b]/25 hover:border-[#00f59b]/60 transition-all text-xs font-semibold shadow-[0_0_15px_rgba(0,245,155,0.15)] hover:shadow-[0_0_25px_rgba(0,245,155,0.3)] cursor-pointer"
                     >
-                      <ExternalLink className="w-3.5 h-3.5 relative z-10 group-hover/live:translate-x-0.5 group-hover/live:-translate-y-0.5 transition-transform" />
-                      <span className="relative z-10">Live Demo</span>
+                      <ExternalLink className="w-3.5 h-3.5" />
+                      <span>Live Demo</span>
                     </button>
                   </div>
 
-                  <span className="text-[10px] text-zinc-400 font-mono font-bold shrink-0 ml-2">
-                    0{idx + 1}
-                  </span>
+                  <button
+                    onClick={() => setSelectedProject(project)}
+                    className="inline-flex items-center gap-1.5 text-xs text-zinc-400 hover:text-[#00f59b] transition-colors cursor-pointer group/details font-medium"
+                  >
+                    <span>Details</span>
+                    <ArrowUpRight className="w-3.5 h-3.5 group-hover/details:translate-x-0.5 group-hover/details:-translate-y-0.5 transition-transform" />
+                  </button>
                 </div>
               </FluxCard>
             </motion.div>
@@ -174,36 +178,36 @@ export const ProjectsSection: React.FC = () => {
         </div>
       </div>
 
-      {/* Lightbox Modal */}
+      {/* Project modal */}
       <AnimatePresence>
         {selectedProject && (
           <div
-            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-xl cursor-pointer"
+            className="fixed inset-0 z-[80] flex items-center justify-center p-4 bg-black/80 backdrop-blur-xl cursor-pointer"
             onClick={() => setSelectedProject(null)}
           >
             <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
+              initial={{ opacity: 0, scale: 0.96, y: 12 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.96, y: 12 }}
+              transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
               onClick={(e) => e.stopPropagation()}
-              className="relative w-full max-w-4xl bg-zinc-950 border border-white/15 rounded-2xl p-6 sm:p-8 max-h-[92vh] overflow-y-auto shadow-2xl cursor-default"
+              className="relative w-full max-w-4xl surface p-5 sm:p-8 max-h-[92vh] overflow-y-auto cursor-default"
             >
               <button
                 onClick={() => setSelectedProject(null)}
-                className="absolute top-6 right-6 p-2.5 rounded-full bg-zinc-900/90 hover:bg-zinc-800 text-zinc-300 hover:text-white border border-white/15 hover:border-[#00b848]/60 transition-all duration-300 hover:scale-110 active:scale-90 cursor-pointer shadow-sm hover:shadow-[0_0_15px_rgba(0,184,72,0.3)]"
+                className="absolute top-5 right-5 p-2 rounded-full bg-[#f3f0e7]/[0.06] hover:bg-[#f3f0e7]/[0.12] text-[#d8d4c6] hover:text-white border border-[#f3f0e7]/10 transition-colors cursor-pointer"
                 aria-label="Close Project Modal"
               >
                 <X className="w-4 h-4" />
               </button>
 
-              <h3 className="text-2xl font-bold text-white font-dot tracking-wider mb-1">
-                {selectedProject.title.toUpperCase()}
+              <p className="eyebrow mb-2 text-[#6f6d64]">Case study</p>
+              <h3 className="font-dot text-4xl sm:text-5xl text-[#f3f0e7] leading-none mb-2 pr-10">
+                {selectedProject.title}
               </h3>
-              <p className="text-xs font-mono text-zinc-400 mb-6">
-                {selectedProject.subtitle}
-              </p>
+              <p className="text-xs text-[#a3a096] mb-7">{selectedProject.subtitle}</p>
 
-              <div className="mb-6 rounded-xl overflow-hidden border border-white/10">
+              <div className="mb-6 rounded-2xl overflow-hidden border border-[#f3f0e7]/[0.08]">
                 {selectedProject.images && selectedProject.images.length > 0 ? (
                   <ProjectImageGallery
                     images={selectedProject.images}
@@ -216,7 +220,7 @@ export const ProjectsSection: React.FC = () => {
                         captions: selectedProject.imageCaptions,
                         title: selectedProject.title,
                         initialIndex: idx,
-                        liveUrl: selectedProject.liveUrl
+                        liveUrl: selectedProject.liveUrl,
                       })
                     }
                   />
@@ -225,33 +229,32 @@ export const ProjectsSection: React.FC = () => {
                 )}
               </div>
 
-              <div className="space-y-4 mb-6 text-sm text-zinc-300 font-space leading-relaxed">
+              <div className="space-y-5 mb-7 text-sm text-[#b5b1a4] font-space leading-relaxed">
                 <p>{selectedProject.longDescription}</p>
 
-                <div className="pt-2">
-                  <h5 className="text-xs font-mono text-zinc-400 mb-2 uppercase">Key Highlights:</h5>
-                  <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs font-mono">
+                <div className="pt-1">
+                  <h5 className="eyebrow mb-3 text-[#6f6d64]">Key highlights</h5>
+                  <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
                     {selectedProject.features.map((feat, i) => (
-                      <li key={i} className="flex items-start gap-2 p-2 rounded bg-zinc-900/60 border border-white/5">
-                        <span className="text-[#00b848] font-bold">&gt;</span>
-                        <span className="text-zinc-300">{feat}</span>
+                      <li key={i} className="flex items-start gap-2.5 p-3 rounded-xl bg-[#f3f0e7]/[0.025] border border-[#f3f0e7]/[0.06]">
+                        <span className="w-1 h-1 rounded-full bg-[#dcf27a] mt-1.5 shrink-0" />
+                        <span className="text-[#a3a096] leading-relaxed">{feat}</span>
                       </li>
                     ))}
                   </ul>
                 </div>
               </div>
 
-              {/* Modal Actions with both GitHub and Live Demo buttons */}
-              <div className="flex flex-wrap items-center justify-between gap-3 pt-4 border-t border-white/10">
-                <div className="flex items-center gap-3">
+              <div className="flex flex-wrap items-center justify-between gap-3 pt-5 border-t border-[#f3f0e7]/[0.08]">
+                <div className="flex items-center gap-2.5">
                   <a
                     href={selectedProject.githubUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="px-5 py-2.5 rounded-full bg-zinc-900 hover:bg-zinc-800 text-white border border-white/20 hover:border-white/40 text-xs flex items-center gap-2 transition-all duration-300 hover:scale-105 active:scale-95 shadow-sm font-dot tracking-wide"
+                    className="btn-ghost !px-4 !py-2.5"
                   >
-                    <Github className="w-4 h-4 text-zinc-300" />
-                    <span>View Repository</span>
+                    <Github className="w-4 h-4 text-[#a3a096]" />
+                    <span>View repository</span>
                   </a>
 
                   <button
@@ -261,16 +264,16 @@ export const ProjectsSection: React.FC = () => {
                       setSelectedProject(null);
                       openLiveDemoNotice(title);
                     }}
-                    className="relative overflow-hidden px-5 py-2.5 rounded-full bg-[#00b848]/20 hover:bg-[#00b848]/35 text-[#00ff66] hover:text-white border border-[#00b848]/40 hover:border-[#00b848]/80 text-xs flex items-center gap-2 transition-all duration-300 font-semibold shadow-[0_0_20px_rgba(0,184,72,0.25)] hover:scale-105 active:scale-95 font-dot tracking-wide cursor-pointer"
+                    className="btn-primary !px-4 !py-2.5"
                   >
-                    <ExternalLink className="w-4 h-4 relative z-10" />
-                    <span className="relative z-10">Open Live Demo</span>
+                    <ExternalLink className="w-3.5 h-3.5" />
+                    <span>Open live demo</span>
                   </button>
                 </div>
 
                 <button
                   onClick={() => setSelectedProject(null)}
-                  className="px-5 py-2.5 rounded-full bg-white/10 hover:bg-white/20 text-white text-xs font-dot transition-all duration-300 hover:scale-105 active:scale-95 cursor-pointer"
+                  className="px-4 py-2.5 rounded-full text-xs text-[#a3a096] hover:text-[#f3f0e7] transition-colors cursor-pointer"
                 >
                   Close
                 </button>
@@ -280,7 +283,6 @@ export const ProjectsSection: React.FC = () => {
         )}
       </AnimatePresence>
 
-      {/* Universal Fullscreen Lightbox for distortion-free viewing */}
       {fullscreenData && (
         <FullscreenLightbox
           isOpen={!!fullscreenData}

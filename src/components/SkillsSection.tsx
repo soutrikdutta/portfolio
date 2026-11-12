@@ -2,36 +2,23 @@ import React, { useRef } from 'react';
 import { motion, useScroll, useSpring, useTransform } from 'motion/react';
 import { Code, Cpu, Database } from 'lucide-react';
 import { FluxCard } from './FluxCard';
-import { GlyphDecryptText } from './GlyphDecryptText';
+import { SectionHeader } from './SectionHeader';
 import { PORTFOLIO_DATA } from '../data/portfolioData';
 import { useScrollDirection } from '../hooks/useScrollAnimation';
 
-// Authentic Vibrant SVG Logos for Compact Skills
 const SkillIcon: React.FC<{ type: string }> = ({ type }) => {
   switch (type) {
     case 'html':
-      return (
-        <span className="font-mono font-bold text-[10px] text-[#e34f26]">
-          &lt;/&gt;
-        </span>
-      );
+      return <span className="font-mono font-bold text-[10px] text-[#e34f26]">&lt;/&gt;</span>;
     case 'css':
-      return (
-        <span className="font-mono font-bold text-[10px] text-[#1572b6]">
-          #
-        </span>
-      );
+      return <span className="font-mono font-bold text-[10px] text-[#1572b6]">#</span>;
     case 'javascript':
       return (
-        <div className="w-3.5 h-3.5 rounded bg-[#f7df1e] text-black flex items-center justify-center font-mono font-black text-[8px]">
-          JS
-        </div>
+        <div className="w-3.5 h-3.5 rounded-[3px] bg-[#f7df1e] text-black flex items-center justify-center font-mono font-black text-[8px]">JS</div>
       );
     case 'typescript':
       return (
-        <div className="w-3.5 h-3.5 rounded bg-[#3178c6] text-white flex items-center justify-center font-mono font-black text-[8px]">
-          TS
-        </div>
+        <div className="w-3.5 h-3.5 rounded-[3px] bg-[#3178c6] text-white flex items-center justify-center font-mono font-black text-[8px]">TS</div>
       );
     case 'react':
       return (
@@ -46,9 +33,7 @@ const SkillIcon: React.FC<{ type: string }> = ({ type }) => {
       );
     case 'nextjs':
       return (
-        <div className="w-3.5 h-3.5 rounded-full bg-white text-black flex items-center justify-center font-mono font-black text-[8px]">
-          N
-        </div>
+        <div className="w-3.5 h-3.5 rounded-full bg-white text-black flex items-center justify-center font-mono font-black text-[8px]">N</div>
       );
     case 'tailwind':
       return (
@@ -58,9 +43,7 @@ const SkillIcon: React.FC<{ type: string }> = ({ type }) => {
       );
     case 'nodejs':
       return (
-        <div className="w-3.5 h-3.5 rounded bg-[#339933]/20 border border-[#339933]/40 flex items-center justify-center font-mono font-bold text-[7px] text-[#22c55e]">
-          NODE
-        </div>
+        <div className="w-3.5 h-3.5 rounded-[3px] bg-[#339933]/15 border border-[#339933]/40 flex items-center justify-center font-mono font-bold text-[6px] text-[#22c55e]">NODE</div>
       );
     case 'python':
       return (
@@ -69,7 +52,7 @@ const SkillIcon: React.FC<{ type: string }> = ({ type }) => {
         </svg>
       );
     case 'ai':
-      return <Cpu className="w-3.5 h-3.5 text-[#a855f7]" />;
+      return <Cpu className="w-3.5 h-3.5 text-[#c9a8ff]" />;
     case 'git':
       return (
         <svg className="w-3.5 h-3.5 text-[#f05032]" viewBox="0 0 24 24" fill="currentColor">
@@ -77,9 +60,9 @@ const SkillIcon: React.FC<{ type: string }> = ({ type }) => {
         </svg>
       );
     case 'database':
-      return <Database className="w-3.5 h-3.5 text-[#06b6d4]" />;
+      return <Database className="w-3.5 h-3.5 text-[#a4cfc0]" />;
     default:
-      return <Code className="w-3.5 h-3.5 text-zinc-300" />;
+      return <Code className="w-3.5 h-3.5 text-[#b5b1a4]" />;
   }
 };
 
@@ -88,76 +71,74 @@ export const SkillsSection: React.FC = () => {
   const sectionRef = useRef<HTMLDivElement>(null);
   const direction = useScrollDirection();
 
-  // Continuous bi-directional scroll parallax
   const { scrollYProgress } = useScroll({
     target: sectionRef,
     offset: ['start end', 'end start'],
   });
   const smoothProgress = useSpring(scrollYProgress, { stiffness: 180, damping: 26 });
-  const boxFloat = useTransform(smoothProgress, [0, 1], [-12, 12]);
+  const boxFloat = useTransform(smoothProgress, [0, 1], [-10, 10]);
 
   const offset = direction === 'down' ? 28 : -28;
 
   return (
-    <section ref={sectionRef} id="skills" className="py-20 px-6 relative">
+    <section ref={sectionRef} id="skills" className="py-20 sm:py-28 px-5 sm:px-6 relative">
       <div className="max-w-6xl mx-auto">
-        {/* Section Header */}
         <motion.div
           initial={{ opacity: 0, y: offset }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: false, amount: 0.1 }}
-          transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-          className="mb-10"
+          transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
         >
-          <h2 className="text-3xl sm:text-4xl font-bold tracking-wider text-white font-dot">
-            <GlyphDecryptText text="TECHNICAL SKILLS" speed={28} />
-          </h2>
-          <div className="mt-2.5 flex items-center gap-2">
-            <motion.div
-              initial={{ scaleX: 0 }}
-              whileInView={{ scaleX: 1 }}
-              viewport={{ once: false }}
-              transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-              style={{ originX: 0 }}
-              className="h-[2px] w-24 bg-gradient-to-r from-[#00ff66] to-transparent rounded-full"
-            />
-            <span className="w-1.5 h-1.5 rounded-full bg-[#00ff66] animate-pulse" />
-          </div>
+          <SectionHeader
+            tag="CAPABILITIES"
+            title="TECH STACK & SKILLS"
+            subtitle="Core languages, frameworks, and cloud architectures powering my applications."
+          />
         </motion.div>
 
-        {/* Box containing small skills with authentic colored logos and bi-directional float */}
         <motion.div
           style={{ y: boxFloat }}
-          initial={{ opacity: 0, y: offset, scale: 0.98 }}
+          initial={{ opacity: 0, y: offset, scale: 0.99 }}
           whileInView={{ opacity: 1, y: 0, scale: 1 }}
           viewport={{ once: false, amount: 0.1 }}
-          transition={{ duration: 0.65, delay: 0.05, ease: [0.16, 1, 0.3, 1] }}
+          transition={{ duration: 0.7, delay: 0.05, ease: [0.16, 1, 0.3, 1] }}
           className="transform-gpu will-change-transform"
         >
-          <FluxCard className="p-6 sm:p-8 border-white/10 hover:border-white/20 relative overflow-hidden">
+          <FluxCard className="p-5 sm:p-7 relative overflow-hidden bg-zinc-950/75 border-white/10 shadow-2xl">
+            <div className="flex items-center justify-between px-2 pt-1 pb-6 border-b border-white/10 mb-6">
+              <p className="eyebrow text-[#00f59b] font-semibold">CORE TOOLKIT</p>
+              <span className="font-mono text-xs text-zinc-400 font-medium">{compactSkills.length} Verified Technologies</span>
+            </div>
+
             <motion.div
-              variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.045, delayChildren: 0.08 } } }}
+              variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.04, delayChildren: 0.06 } } }}
               initial="hidden"
               whileInView="visible"
               viewport={{ once: false, amount: 0.12 }}
-              className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 relative z-10"
+              className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 relative z-10"
             >
               {compactSkills.map((skill) => (
                 <motion.div
                   key={skill.name}
                   variants={{
-                    hidden: { opacity: 0, scale: 0.8, y: 16 },
-                    visible: { opacity: 1, scale: 1, y: 0, transition: { type: 'spring', stiffness: 320, damping: 22 } },
+                    hidden: { opacity: 0, y: 14 },
+                    visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] } },
                   }}
-                  whileHover={{ y: -4, scale: 1.07, transition: { type: 'spring', stiffness: 400, damping: 20 } }}
-                  className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl bg-zinc-950/70 hover:bg-zinc-900/90 border border-white/5 hover:border-[#00ff66]/40 hover:shadow-[0_0_20px_rgba(0,255,102,0.12)] transition-colors duration-200 group cursor-default transform-gpu"
+                  whileHover={{ y: -3, scale: 1.02 }}
+                  transition={{ type: 'spring', stiffness: 400, damping: 24 }}
+                  className="flex items-center gap-3 px-3.5 py-3.5 rounded-2xl bg-white/[0.03] border border-white/10 hover:border-[#00f59b]/40 hover:bg-white/[0.07] hover:shadow-[0_8px_25px_rgba(0,245,155,0.12)] transition-all duration-300 group cursor-default transform-gpu"
                 >
-                  <div className="p-1 rounded-lg bg-zinc-900/90 border border-white/5 group-hover:border-white/20 transition-colors shrink-0">
+                  <div className="w-9 h-9 rounded-xl bg-white/[0.05] border border-white/10 flex items-center justify-center group-hover:border-[#00f59b]/40 group-hover:bg-[#00f59b]/10 transition-colors shrink-0">
                     <SkillIcon type={skill.icon} />
                   </div>
-                  <span className="text-xs font-mono text-zinc-200 group-hover:text-white transition-colors truncate">
-                    {skill.shortName}
-                  </span>
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold text-white group-hover:text-[#00f59b] transition-colors truncate">
+                      {skill.shortName}
+                    </p>
+                    <p className="font-mono text-[10px] uppercase tracking-[0.06em] text-zinc-400 truncate">
+                      {skill.name === skill.shortName ? 'Engine' : skill.name}
+                    </p>
+                  </div>
                 </motion.div>
               ))}
             </motion.div>

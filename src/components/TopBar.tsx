@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { motion } from 'motion/react';
-import { Menu, X, ArrowUpRight } from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
+import { Menu, X, ArrowUpRight, Command } from 'lucide-react';
 
 interface TopBarProps {
   currentView: 'home' | 'certifications';
@@ -18,21 +18,21 @@ interface NavItem {
 const NAV_ITEMS: NavItem[] = [
   { id: 'about', label: 'About', href: '#about' },
   { id: 'journey', label: 'Journey', href: '#journey' },
-  { id: 'projects', label: 'Projects', href: '#projects' },
+  { id: 'projects', label: 'Work', href: '#projects' },
   { id: 'skills', label: 'Skills', href: '#skills' },
-  { id: 'achievements', label: 'Achievements', href: '#achievements' },
-  { id: 'certifications', label: 'Certifications', href: '#certifications' },
+  { id: 'achievements', label: 'Awards', href: '#achievements' },
+  { id: 'certifications', label: 'Certs', href: '#certifications' },
 ];
 
 export const TopBar: React.FC<TopBarProps> = ({
   currentView,
   onNavigate,
   onScrollToSection,
+  onOpenCommandPalette,
 }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeSection, setActiveSection] = useState<string | null>(null);
 
-  // Scroll spy: detects active section efficiently without layout thrashing
   useEffect(() => {
     if (currentView === 'certifications') {
       setActiveSection('certifications');
@@ -46,9 +46,7 @@ export const TopBar: React.FC<TopBarProps> = ({
       const obs = new IntersectionObserver(
         (entries) => {
           entries.forEach((entry) => {
-            if (entry.isIntersecting) {
-              setActiveSection(item.id);
-            }
+            if (entry.isIntersecting) setActiveSection(item.id);
           });
         },
         { rootMargin: '-20% 0px -60% 0px' }
@@ -57,17 +55,17 @@ export const TopBar: React.FC<TopBarProps> = ({
       observers.push(obs);
     });
 
-    let scrollTicking = false;
+    let ticking = false;
     const handleScrollEdges = () => {
-      if (!scrollTicking) {
-        scrollTicking = true;
+      if (!ticking) {
+        ticking = true;
         window.requestAnimationFrame(() => {
           if (window.scrollY < 100) {
             setActiveSection(null);
           } else if (window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 70) {
             setActiveSection('certifications');
           }
-          scrollTicking = false;
+          ticking = false;
         });
       }
     };
@@ -80,6 +78,12 @@ export const TopBar: React.FC<TopBarProps> = ({
     };
   }, [currentView]);
 
+  const scrollToTop = () => {
+    const lenis = (window as unknown as { __lenis?: { scrollTo: (target: number, opts: { duration: number }) => void } }).__lenis;
+    if (lenis) lenis.scrollTo(0, { duration: 1.2 });
+    else window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   const handleNavClick = (href: string, id: string) => {
     setMobileMenuOpen(false);
     setActiveSection(id);
@@ -87,58 +91,50 @@ export const TopBar: React.FC<TopBarProps> = ({
     const lenis = (window as unknown as { __lenis?: { scrollTo: (target: string | HTMLElement | number, opts: { offset?: number; duration?: number }) => void } }).__lenis;
 
     if (id === 'certifications' && currentView === 'certifications') {
-      if (onScrollToSection) {
-        onScrollToSection('certifications');
-      } else {
-        if (lenis) lenis.scrollTo(0, { duration: 1.2 });
-        else window.scrollTo({ top: 0, behavior: 'smooth' });
-      }
+      if (onScrollToSection) onScrollToSection('certifications');
+      else scrollToTop();
       return;
     }
 
     if (currentView !== 'home') {
-      if (onScrollToSection) {
-        onScrollToSection(id);
-      } else {
-        onNavigate('home');
-      }
+      if (onScrollToSection) onScrollToSection(id);
+      else onNavigate('home');
       return;
     }
 
     const el = document.querySelector(href) as HTMLElement | null;
     if (el) {
-      if (lenis) lenis.scrollTo(el, { offset: -70, duration: 1.2 });
+      if (lenis) lenis.scrollTo(el, { offset: -96, duration: 1.2 });
       else el.scrollIntoView({ behavior: 'smooth' });
     }
   };
 
   return (
     <motion.header
-      initial={{ opacity: 0, y: -16 }}
+      initial={{ opacity: 0, y: -14 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1], delay: 0.1 }}
-      className="fixed top-4 inset-x-0 z-50 flex justify-center px-4 pointer-events-none"
+      transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1], delay: 0.1 }}
+      className="fixed top-[calc(env(safe-area-inset-top)+0.85rem)] sm:top-5 inset-x-0 z-[60] flex justify-center px-3.5 sm:px-4 pointer-events-none"
     >
-      {/* Floating Rounded-Full Glass Pill Container */}
-      <div className="pointer-events-auto max-w-4xl w-full rounded-full bg-zinc-950/80 backdrop-blur-2xl border border-white/15 px-5 sm:px-7 py-2 shadow-[0_12px_40px_rgba(0,0,0,0.7),0_0_25px_rgba(0,184,72,0.06),inset_0_1px_0_rgba(255,255,255,0.18)] flex items-center justify-between transition-all duration-300 hover:border-white/25">
-        {/* Zone 1: Brand Wordmark */}
+      <div className="pointer-events-auto w-full max-w-5xl rounded-full border border-white/10 bg-zinc-950/80 backdrop-blur-2xl px-3.5 sm:px-4 py-2 shadow-[0_20px_50px_-20px_rgba(0,0,0,0.8),inset_0_1px_0_rgba(255,255,255,0.1)] flex items-center justify-between gap-3">
+
+        {/* Brand */}
         <button
           onClick={() => {
             setActiveSection(null);
             onNavigate('home');
-            const lenis = (window as unknown as { __lenis?: { scrollTo: (target: number, opts: { duration: number }) => void } }).__lenis;
-            if (lenis) lenis.scrollTo(0, { duration: 1.2 });
-            else window.scrollTo({ top: 0, behavior: 'smooth' });
+            scrollToTop();
           }}
-          className="text-left group flex items-center cursor-pointer py-1"
+          className="group flex items-center gap-2 pl-2 pr-1 cursor-pointer shrink-0"
         >
-          <span className="text-xs sm:text-sm font-bold tracking-wider text-white group-hover:text-zinc-200 transition-colors font-dot">
-            SOUTRIK<span className="text-[#00b848]">.</span>DUTTA
+          <span className="w-2 h-2 rounded-full bg-[#00f59b] animate-pulse" />
+          <span className="font-dot text-base sm:text-lg font-bold tracking-tight text-white group-hover:text-[#00f59b] transition-colors leading-none">
+            Soutrik Dutta
           </span>
         </button>
 
-        {/* Zone 2: Navigation Links with Transferring Oval Active Pill Animation */}
-        <nav className="hidden md:flex items-center gap-1 text-xs font-medium relative">
+        {/* Desktop nav */}
+        <nav className="hidden lg:flex items-center gap-1 relative">
           {NAV_ITEMS.map((item) => {
             const isActive =
               activeSection === item.id ||
@@ -148,79 +144,95 @@ export const TopBar: React.FC<TopBarProps> = ({
               <button
                 key={item.id}
                 onClick={() => handleNavClick(item.href, item.id)}
-                className={`relative px-3.5 py-1.5 rounded-full transition-colors duration-200 cursor-pointer text-xs font-medium z-10 ${
-                  isActive
-                    ? 'text-white font-semibold'
-                    : 'text-zinc-200 hover:text-white'
+                className={`relative px-3.5 py-1.5 rounded-full transition-colors duration-200 cursor-pointer text-xs tracking-wider uppercase font-medium z-10 ${
+                  isActive ? 'text-white font-semibold' : 'text-zinc-400 hover:text-white'
                 }`}
               >
-                {/* Smooth Animated Oval Pill Transferring with layoutId */}
                 {isActive && (
                   <motion.div
                     layoutId="activeNavPill"
-                    className="absolute inset-0 rounded-full bg-gradient-to-r from-emerald-500/15 via-white/10 to-emerald-500/15 border border-[#00b848]/40 shadow-[0_0_16px_rgba(0,184,72,0.22),inset_0_1px_1px_rgba(255,255,255,0.3)] backdrop-blur-sm -z-10"
-                    transition={{
-                      type: 'spring',
-                      stiffness: 420,
-                      damping: 30,
-                      mass: 0.65
-                    }}
+                    className="absolute inset-0 rounded-full bg-white/[0.08] border border-white/15 -z-10 shadow-sm"
+                    transition={{ type: 'spring', stiffness: 420, damping: 32, mass: 0.6 }}
                   />
                 )}
-                <span className="relative z-10">{item.label}</span>
+                <span className="relative z-10 flex items-center gap-1.5">
+                  {item.label}
+                </span>
               </button>
             );
           })}
         </nav>
 
-        {/* Zone 3: Primary Action & Mobile Toggle (Omnitrix button deleted) */}
-        <div className="flex items-center gap-2 sm:gap-3">
+        {/* Actions */}
+        <div className="flex items-center gap-1.5 sm:gap-2">
+          {onOpenCommandPalette && (
+            <button
+              onClick={onOpenCommandPalette}
+              className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-white/10 text-zinc-400 hover:text-white hover:border-white/20 transition-colors cursor-pointer bg-white/[0.03]"
+              aria-label="Open command palette"
+              title="Command palette"
+            >
+              <Command className="w-3 h-3 text-[#00f59b]" />
+              <span className="font-mono text-[10px] font-bold">⌘K</span>
+            </button>
+          )}
+
           <button
             onClick={() => handleNavClick('#contact', 'contact')}
-            className="relative overflow-hidden px-4 sm:px-5 py-2 text-xs font-dot font-semibold text-white bg-zinc-900/90 hover:bg-zinc-800 hover:text-[#00ff66] border border-white/20 hover:border-[#00b848]/60 rounded-full transition-all duration-300 flex items-center gap-1.5 whitespace-nowrap shadow-sm hover:shadow-[0_0_15px_rgba(0,184,72,0.3)] hover:scale-105 active:scale-95 cursor-pointer group tracking-wide"
+            className="hidden sm:inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-zinc-950 bg-gradient-to-r from-[#00f59b] to-[#00d272] hover:brightness-110 rounded-full transition-all duration-300 tracking-wide hover:shadow-[0_0_20px_rgba(0,245,155,0.45)] hover:scale-[1.03] active:scale-95 cursor-pointer group"
           >
-            <span className="relative z-10 font-medium">Let's Talk</span>
-            <ArrowUpRight className="w-3.5 h-3.5 relative z-10 text-[#00ff66] group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+            <span>Let&apos;s talk</span>
+            <ArrowUpRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
           </button>
 
-          {/* Mobile hamburger */}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="p-2 text-zinc-300 hover:text-white md:hidden cursor-pointer rounded-full hover:bg-white/10 transition-colors"
+            className="inline-flex items-center justify-center min-w-10 min-h-10 p-2 text-zinc-300 hover:text-white lg:hidden cursor-pointer rounded-full hover:bg-white/5 transition-colors"
             aria-label="Toggle Navigation"
+            aria-expanded={mobileMenuOpen}
           >
             {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
         </div>
       </div>
 
-      {/* Floating Mobile Drawer Menu */}
-      {mobileMenuOpen && (
-        <div className="pointer-events-auto absolute top-16 inset-x-4 max-w-sm mx-auto bg-zinc-950/95 backdrop-blur-2xl border border-white/15 rounded-3xl p-4 flex flex-col gap-2 text-xs text-white shadow-2xl font-dot">
-          {NAV_ITEMS.map((item, idx) => {
-            const isActive = activeSection === item.id;
-            return (
-              <button
-                key={item.id}
-                onClick={() => handleNavClick(item.href, item.id)}
-                className={`py-2.5 px-4 rounded-full text-left transition-all ${
-                  isActive
-                    ? 'text-[#00ff66] bg-[#00b848]/15 border border-[#00b848]/30 font-semibold shadow-[0_0_12px_rgba(0,184,72,0.2)]'
-                    : 'text-white/90 hover:text-[#00ff66] hover:bg-white/5'
-                }`}
-              >
-                0{idx + 1}. {item.label.toUpperCase()}
-              </button>
-            );
-          })}
-          <button
-            onClick={() => handleNavClick('#contact', 'contact')}
-            className="py-2.5 px-4 rounded-full text-left text-white/90 hover:text-[#00ff66] hover:bg-white/5 transition-all"
+      {/* Mobile drawer */}
+      <AnimatePresence>
+        {mobileMenuOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: -8, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -8, scale: 0.98 }}
+            transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+            className="pointer-events-auto absolute top-[4.4rem] inset-x-4 max-w-sm mx-auto surface p-3.5 flex flex-col text-white shadow-2xl lg:hidden border-white/15 bg-zinc-950/95"
           >
-            07. CONTACT
-          </button>
-        </div>
-      )}
+            {NAV_ITEMS.map((item, idx) => {
+              const isActive = activeSection === item.id;
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => handleNavClick(item.href, item.id)}
+                  className={`py-2.5 px-3.5 rounded-xl text-left transition-all text-sm flex items-center justify-between ${
+                    isActive
+                      ? 'text-[#00f59b] bg-[#00f59b]/10 font-semibold'
+                      : 'text-zinc-300 hover:text-white hover:bg-white/[0.04]'
+                  }`}
+                >
+                  <span>{item.label}</span>
+                  <span className="font-mono text-[10px] text-zinc-500">0{idx + 1}</span>
+                </button>
+              );
+            })}
+            <button
+              onClick={() => handleNavClick('#contact', 'contact')}
+              className="mt-1 py-2.5 px-3.5 rounded-xl text-left text-sm text-zinc-950 bg-gradient-to-r from-[#00f59b] to-[#00d272] font-bold flex items-center justify-between"
+            >
+              <span>Contact</span>
+              <ArrowUpRight className="w-4 h-4" />
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </motion.header>
   );
 };
